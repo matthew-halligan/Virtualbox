@@ -5,6 +5,7 @@
 ORIGINAL_DIR=$(pwd)
 USER=mjhallig
 
+
 #Start everything with an up to date working environment
 sudo apt-get upgrade -y
 sudo apt-get update -y
@@ -16,8 +17,10 @@ echo "insecure" >> /home/$USER/.curlrc
 #install git
 sudo apt-get install git -y
 
-# create ssh keys to pair with private repos
-
+#Add Site Certs for known required connections
+./${ORIGINAL_DIR}/add_site_cert.sh download.docker.com 443
+./${ORIGINAL_DIR}/add_site_cert.sh apt.llvm.org 443
+./${ORIGINAL_DIR}/add_site_cert.sh www.github.com 443
 
 #Install docker
 sudo apt-get update -y
@@ -117,6 +120,7 @@ sudo apt-get install libprotobuf-dev
 #install Boost
 sudo apt-get update -y
 sudo apt-get install libboost-all-dev -y
+
 
 #install Doxygen
 sudo apt-get install doxygen -y
