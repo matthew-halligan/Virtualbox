@@ -1,6 +1,11 @@
 FROM debian:buster
 
-RUN apt-get update && apt-get install -y software-properties-common wget gnupg
+RUN apt-get update && apt-get install -y software-properties-common wget gnupg openssl
+
+COPY ./add_site_cert /bin/add_site_cert.sh
+RUN /bin/add_site_cert.sh github.com 443
+RUN /bin/add_site_cert.sh apt.llvm.org 443
+
 RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
 RUN apt-add-repository "deb http://apt.llvm.org/buster/ llvm-toolchain-buster-8 main" && apt-get update
 RUN apt-get install -y clang-8 libclang-8-dev llvm-8-dev cmake git wget
