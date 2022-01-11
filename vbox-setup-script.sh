@@ -131,17 +131,23 @@ sudo apt-get install doxygen -y
 
 #install Chisel
 cd Chisel/
+sudo chmod 777 . -R
 sudo ./build.sh
+sudo chmod 766 . -R
 cd ..
 
 #install CBAT
 cd CBAT/
+sudo chmod 777 . -R
 sudo ./build.sh
+sudo chmod 766 . -R
 cd ..
 
 #install gtirb 
 cd GTIRB/
+sudo chmod 777 . -R
 sudo ./build.sh
+sudo chmod 766 . -R
 cd ..
 #sudo apt-get update -y
 #sudo apt-get install cmake -y
