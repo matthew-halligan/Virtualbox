@@ -130,7 +130,7 @@ sudo apt-get install doxygen -y
 #sudo apt-get install -y clisp
 
 #install Chisel
-cd CHISEL/
+cd Chisel/
 sudo ./build.sh
 cd ..
 
