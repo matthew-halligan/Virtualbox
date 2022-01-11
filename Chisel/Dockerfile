@@ -2,7 +2,7 @@ FROM debian:buster
 
 RUN apt-get update && apt-get install -y software-properties-common wget gnupg openssl
 
-COPY ./add_site_cert /bin/add_site_cert.sh
+COPY ./add_site_cert.sh /bin/add_site_cert.sh
 RUN /bin/add_site_cert.sh github.com 443
 RUN /bin/add_site_cert.sh apt.llvm.org 443
 
