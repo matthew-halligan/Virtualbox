@@ -129,8 +129,20 @@ sudo apt-get install doxygen -y
 #install Lisp Interpreter
 #sudo apt-get install -y clisp
 
+#install Chisel
+cd CHISEL/
+sudo ./build.sh
+cd ..
+
+#install CBAT
+cd CBAT/
+sudo ./build.sh
+cd ..
 
 #install gtirb 
+cd GTIRB/
+sudo ./build.sh
+cd ..
 #sudo apt-get update -y
 #sudo apt-get install cmake -y
 
