@@ -1,1 +1,14 @@
-
+version: "3"
+services:
+  gtirb:
+    image: grammatech/gtirb-server
+    container_name: gtirb
+  analysis:
+    image: itrussell/binary-analysis
+    stdin_open: true
+    tty: true
+    container_name: analysis
+    depends_on:
+      - gtirb
+    volumes:
+      - ~/GTIRB/analysis/exes:/home/sshuser/tools
