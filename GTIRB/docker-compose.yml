@@ -1,1 +1,33 @@
+version: "3"
+services:
+  gtirb:
+    image: grammatech/gtirb-server
+    container_name: gtirb
+    ports: 
+      - "80:80"
+    hostname: gtirb    
+    networks:
+      net:
+        ipv4_address: 172.20.0.6
+       
+  analysis:
+    image: itrussell/binary-analysis
+    stdin_open: true
+    tty: true
+    container_name: analysis
+    depends_on:
+      - gtirb
+    hostname: analysis
+    networks:
+      net:
+        ipv4_address: 172.20.0.7
+      
+    volumes:
+      - ./binaries:/home/sshuser/binaries
 
+networks:
+  net:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+    
