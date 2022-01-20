@@ -8,6 +8,8 @@ sudo groupadd docker
 sudo usermode -aG docerk $USER
 newgrp docker # if login still does not work, reboot
 
+docker login
+
 # create working area
 mkdir ~/workspace
 mkdir ~/workspace/binaries
