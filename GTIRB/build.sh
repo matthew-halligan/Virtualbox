@@ -1,38 +1,26 @@
-#! bin/sh
+#!/bin/bash
 
-#fetch the docker container from docker hub
+# install compose and login to docker
+sudo curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
 
-#run the Dockerfile for ANGR toolchain
+# uncomment if recieving login errors 
+# sudo groupadd docker
+# sudo usermod -aG docker $USER
+# newgrp docker # if login still does not work, reboot
+
+docker login
+
+# create working area
+
+mkdir ~/workspace
+mkdir ~/workspace/binaries
+cp ./docker-compose.yml ~/workspace
+cd ~/workspace
 
 
+# start containers
+# need to add a line to insure docker-compose file is in workspace directory
+docker-compose up -d
+docker-compose down
 
-
-# sudo apt-get update -y
-# sudo apt-get install cmake -y
-
-# wget --no-check-certificate -O - https://download.grammatech.com/gtirb/files/apt-repo/conf/apt.gpg.key | sudo apt-key add -
-
-# #sudo touch /etc/apt/apt.conf.d/100verify-peer.conf
-# #sudo chmod 777 /etc/apt/apt.conf.d/100verify-peer.conf
-# #echo >>/etc/apt/apt.conf.d/100verify-peer.conf "Acquire { https::Verify-Peer false }"
-# #sudo chmod 644 /etc/apt/apt.conf.d/100verify-peer.conf
-# echo "deb [trusted=yes] https://download.grammatech.com/gtirb/files/apt-repo focal stable" | sudo tee -a /etc/apt/sources.list
-
-# sudo apt-get update
-# sudo apt-get install libgtirb gtirb-pprinter ddisasm -y
-
-# sudo mkdir /tpcp
-# cd /tpcp
-# sudo mkdir gtirb
-# cd gtirb
-# sudo mkdir build
-# cd build
-
-# sudo git clone https://github.com/GrammaTech/gtirb.git
-
-# sudo cmake gtirb
-
-# pip3 install gtirb
-
-# sudo mkdir build
-# cd build
