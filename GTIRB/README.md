@@ -21,7 +21,7 @@ You will be prompted for a password, the password is 'pwd'
 
 To interact with GTIRB, access it by hostname. 
 
-For example: `curl gtirb`
+For example (inside container): `curl gtirb`
 
 
 ## Troubleshooting
