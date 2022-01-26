@@ -15,7 +15,7 @@ To use the GTIRB container enviroment make sure you are in the GTIRB directory i
 
 Issue the following command:
 
-`./start.sh'
+`./start.sh`
 
 You will be prompted for a password, the password is 'pwd'
 
