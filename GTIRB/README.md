@@ -6,7 +6,7 @@ Make sure you are in the GTIRB directory inside of the Virtualbox repo.
 
 Issue the following command:
 
-`./build.sh'
+`./build.sh`
 
 
 ## Using the containers
