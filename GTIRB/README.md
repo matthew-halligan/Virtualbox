@@ -58,6 +58,6 @@ Run the following commands:
 
 4. (Inside container) Check that GTIRB is connected: `curl gtrib`
 
-5. (Inside container) To exit: `exit'
+5. (Inside container) To exit: `exit`
 
 
