@@ -56,7 +56,7 @@ Run the following commands:
 
 3. Enter the password 'pwd'
 
-4. (Inside container) Check that GTIRB is connected: `curl gtrib`
+4. (Inside container) Check that GTIRB is connected: `curl gtirb`
 
 5. (Inside container) To exit: `exit`
 
