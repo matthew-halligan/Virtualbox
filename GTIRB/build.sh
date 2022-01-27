@@ -5,9 +5,9 @@ sudo curl -k -L "https://github.com/docker/compose/releases/download/1.27.4/dock
 sudo chmod +x /usr/local/bin/docker-compose
 
 # uncomment if recieving login errors 
-# sudo groupadd docker
-# sudo usermod -aG docker $USER
-# newgrp docker # if login still does not work, reboot
+sudo groupadd docker || true
+sudo usermod -aG docker $USER || true
+# newgrp docker || true 
 
 docker login
 

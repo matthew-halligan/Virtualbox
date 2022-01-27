@@ -143,12 +143,9 @@ sudo ./build.sh
 sudo chmod 766 . -R
 cd ..
 
-#install gtirb 
-cd GTIRB/
-sudo chmod 777 . -R
+cd GTIRB
 sudo ./build.sh
-sudo chmod 766 . -R
-cd ..
+
 #sudo apt-get update -y
 #sudo apt-get install cmake -y
 
