@@ -6,7 +6,7 @@ Make sure you are in the GTIRB directory inside of the Virtualbox repo.
 
 Issue the following command:
 
-`./build.sh'
+`./build.sh`
 
 
 ## Using the containers
@@ -15,13 +15,13 @@ To use the GTIRB container enviroment make sure you are in the GTIRB directory i
 
 Issue the following command:
 
-`./start.sh'
+`./start.sh`
 
 You will be prompted for a password, the password is 'pwd'
 
 To interact with GTIRB, access it by hostname. 
 
-For example: `curl gtirb`
+For example (inside container): `curl gtirb`
 
 
 ## Troubleshooting
@@ -56,8 +56,8 @@ Run the following commands:
 
 3. Enter the password 'pwd'
 
-4. (Inside container) Check that GTIRB is connected: `curl gtrib`
+4. (Inside container) Check that GTIRB is connected: `curl gtirb`
 
-5. (Inside container) To exit: `exit'
+5. (Inside container) To exit: `exit`
 
 
