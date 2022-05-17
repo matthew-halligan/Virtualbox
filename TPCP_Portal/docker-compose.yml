@@ -1,0 +1,33 @@
+version: "3"
+services:
+  gtirb:
+    image: grammatech/gtirb-server
+    container_name: gtirb
+    ports: 
+      - "80:80"
+    hostname: gtirb    
+    networks:
+      net:
+        ipv4_address: 172.20.0.6
+       
+  flask-app:
+    image: flaskexperiment:v1
+    #stdin_open: true
+    #tty: true
+    container_name: flaskapp
+    depends_on:
+      - gtirb
+    hostname: flaskapp
+    networks:
+      net:
+        ipv4_address: 172.20.0.7
+    ports:
+      - "5000:5000"  
+    volumes:
+      - /tmp/uploads:/app/uploads
+
+networks:
+  net:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
