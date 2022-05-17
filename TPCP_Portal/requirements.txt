@@ -1,0 +1,19 @@
+# Flask Framework
+click==7.1.2
+Flask==2.0.2
+itsdangerous==2.0.1
+Jinja2==3.0.0
+MarkupSafe==2.0.0rc2
+Werkzeug==2.0.0
+
+# Flask Packages
+Flask-Login==0.4.0
+Flask-Migrate==2.0.2
+Flask-Script==2.0.5
+Flask-SQLAlchemy==2.4.0
+Flask-WTF==0.14.2
+#Flask-User==1.0.1.5
+
+# Automated tests
+pytest==3.0.5
+pytest-cov==2.4.0

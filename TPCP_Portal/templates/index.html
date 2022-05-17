@@ -1,0 +1,90 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>TPCP Portal</title>
+
+  <style>
+  #queue {
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  #queue td, #customers th {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+
+  #queue tr:nth-child(even){background-color: #f2f2f2;}
+
+  #queue tr:hover {background-color: #ddd;}
+
+  #queue th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #04AA6D;
+    color: white;
+  }
+</style>
+</head>
+
+<body>
+  <h1>Upload A New Tarball File Containing Desired Binaries</h1>
+  <form method=post enctype=multipart/form-data>
+    <input type=file name=file>
+    <input type=submit value=Upload>
+  </form>  
+  {% if id %}  
+  <p>The Id of your task is: {{id}}</p>
+  {% endif %}
+
+  {% if current_series_ids|length > 0 %}
+  <table id="queue">
+    <thead><tr>
+      <th>IDs</th>
+      <th>Uploaded File</th>
+      <th>Transform Running</th>
+      <th>Quantity Identified</th>
+      <th>Status</th>
+    </tr></thead>
+    <tbody>
+      {% for item in current_series_ids %}
+      <tr>
+        <td>{{item}}</td>
+        <td>{{current_tasks[item][0]}}</td>
+        <td>{{current_tasks[item][1]}}</td>
+        <td>{{current_tasks[item][2]}}</td>
+        <td>{{current_tasks[item][3]}}</td>
+
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>No Files currently uploaded to server for transformation</p>
+  {% endif %}
+
+  <form method="POST" action={{ url_for('download_file') }}>
+    <p>Enter the ID For Download:</p>
+    <input name="id" type="text">
+    <input type="submit">
+  </form>
+
+  <form method="POST" action={{ url_for('transformation_on_file') }}>
+    <p>Enter the ID For Transform:</p>
+    <input name="id" type="text">
+    <select id="transform" name="transform">
+      <option value="chisel">Chisel</option>
+      <option value="gtirb">GTIRB</option>
+      <option value="cbat">CBAT</option>
+    </select>
+    <input type="submit">
+  </form>
+
+</body>
+</html>
