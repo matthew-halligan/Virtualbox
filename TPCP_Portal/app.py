@@ -53,7 +53,7 @@ def untar(session_path, filename):
     print("Status: ", status)
     files = [f for f in os.listdir(os.path.join(session_path, DOWNLOAD_FOLDER))]
     print(files)
-    status =files
+
     if status == 0:
         # TODO: This quantity will be inaccurate if a directory is present in the untarred directory.  The directory will be considered as 1 item in the count regardless of quantity of nested directories and files beneath
         identified_bin_quantity = int(subprocess.check_output(f"ls {os.path.join(session_path, DOWNLOAD_FOLDER)} | wc -l", shell=True))
