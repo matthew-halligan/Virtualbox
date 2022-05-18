@@ -151,8 +151,8 @@ cd ..
 #install Jetbrains Toolbox
 wget --no-check-certificate https://download.jetbrains.com/toolbox/jetbrains-toolbox-1.24.11947.tar.gz -P ~/Downloads
 
-sudo cd /opt 
-sudo tar -xzvf ~/Downloads/jetbrains-toolbox-1.24.11947.tar.gz .
+cd /opt 
+sudo tar -xzvf ~/Downloads/jetbrains-toolbox-1.24.11947.tar.gz
 sudo mv jetbrains-toolbox-1.24.11947 jetbrains
 sudo ./jetbrains/jetbrains-toolbox
 cd $ORIGINAL_DIR
