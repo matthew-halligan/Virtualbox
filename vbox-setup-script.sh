@@ -35,7 +35,7 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docke
 
 sudo apt-get update -y
 
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose
 # If you need to install a specific docker version comment out the line above
 # and uncomment the lines below
 #sudo apt-get install docker-ce=<VERSION_STRING> docker-ce-cli=<VERSION_STRING> containerd.io
@@ -143,42 +143,17 @@ sudo ./build.sh
 sudo chmod 766 . -R
 cd ..
 
+#install GTIRB
 cd GTIRB
 sudo ./build.sh
+cd ..
 
-#sudo apt-get update -y
-#sudo apt-get install cmake -y
+#install Jetbrains Toolbox
+wget --no-check-certificate https://download.jetbrains.com/toolbox/jetbrains-toolbox-1.24.11947.tar.gz -P ~/Downloads
 
-#wget --no-check-certificate -O - https://download.grammatech.com/gtirb/files/apt-repo/conf/apt.gpg.key | sudo apt-key add -
-#sudo touch /etc/apt/apt.conf.d/100verify-peer.conf
-#sudo chmod 777 /etc/apt/apt.conf.d/100verify-peer.conf
-#echo >>/etc/apt/apt.conf.d/100verify-peer.conf "Acquire { https::Verify-Peer false }"
-#sudo chmod 644 /etc/apt/apt.conf.d/100verify-peer.conf
-#echo "deb [trusted=yes] https://download.grammatech.com/gtirb/files/apt-repo focal stable" | sudo tee -a /etc/apt/sources.list
-
-#sudo apt-get update
-#sudo apt-get install libgtirb gtirb-pprinter ddisasm -y
-
-#sudo mkdir /tpcp
-#cd /tpcp
-#sudo mkdir gtirb
-#cd gtirb
-#sudo mkdir build
-#cd build
-#sudo git -c http.sslVerify=false clone https://github.com/GrammaTech/gtirb.git
-
-#sudo cmake gtirb
-
-#pip3 install gtirb
-
-
-
-#sudo mkdir build
-#cd build
-
-
-#install gtirb server
-
-
-#install bloaty
+sudo cd /opt 
+sudo tar -xzvf ~/Downloads/jetbrains-toolbox-1.24.11947.tar.gz .
+sudo mv jetbrains-toolbox-1.24.11947 jetbrains
+sudo ./jetbrains/jetbrains-toolbox
+cd $ORIGINAL_DIR
 
