@@ -25,6 +25,7 @@ services:
       - "5000:5000"  
     volumes:
       - /tmp/uploads:/app/uploads
+      - ./:/app
 
 networks:
   net:
