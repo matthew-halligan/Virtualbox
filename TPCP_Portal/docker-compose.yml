@@ -1,15 +1,15 @@
 version: "3"
 services:
-  chisel:
-    image: grammatech/chisel
-    container_name: chisel
-    #ports:
-      #- "80:80"
-    hostname: chisel
-    networks:
-      net:
-        ipv4_address: 172.20.0.5
-    tty: true
+#  chisel:
+#    image: grammatech/chisel
+#    container_name: chisel
+#    #ports:
+#      #- "80:80"
+#    hostname: chisel
+#    networks:
+#      net:
+#        ipv4_address: 172.20.0.5
+#    tty: true
   gtirb:
     image: grammatech/gtirb-server
     container_name: gtirb
