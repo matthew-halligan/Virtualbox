@@ -1,0 +1,132 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>TPCP Portal</title>
+
+  <style>
+  body {
+    background-color: white;
+    font-family: 'Scope One', serif;
+  }
+
+  span {
+    font-size: 9
+  }
+
+  p {
+    margin-top: 0;
+    margin: auto;
+    color: white;
+    <!--    width: 50%;-->
+  }
+
+  #queue {
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  #queue td, #customers th {
+    border: 1px solid #ddd;
+    padding: 8px;
+    color: black;
+  }
+
+  #queue tr:nth-child(even){background-color: #f2f2f2;}
+
+  #queue tr:hover {background-color: #ddd;}
+
+  #queue th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #04AA6D;
+    color: white;
+  }
+
+</style>
+</head>
+<body>
+    <h1>Upload A New Tarball File Containing Desired Binaries</h1>
+    <form class="my-form" onsubmit="upload_file()" enctype="multipart/form-data" method="post">
+        <input type="hidden" value="UploadFile" name="HiddenField">
+        <input type="file"  multiple accept="file_extension", name="files[]">
+
+        <br><br>
+        <p>Adding to a previous job or new job?</p>
+         <label for="ID">Choose an ID:</label>
+         <select id="ID" name="JobID">
+            <option value="New Job">New Job</option>
+            {% if current_series_ids|length > 0 %}
+               {% for item in current_series_ids %}
+                 <option value={{item}}>ID: {{item}}</option>
+               {% endfor %}
+            {% endif %}
+         </select>
+        <br><br>
+        <input type="submit" id="upload_files">
+    </form>
+    <progress id="progress-bar" max="100" value="10"></progress>
+
+    {% if id %}
+    <p>The Id of your task is: {{id}}</p>
+    {% endif %}
+
+    {% if current_series_ids|length > 0 %}
+    <table id="queue">
+        <form method="post" onsubmit="upload_table()">
+            <input type="hidden" value="ModifyFile" name="HiddenField">
+          <thead><tr>
+            <th>IDs</th>
+            <th>Filename</th>
+            <th>File type</th>
+            <th>Transform Running</th>
+            <th>Status</th>
+            <th>Update</th>
+          </tr></thead>
+          <tbody>
+            {% for item in current_series_ids %}
+                {% for key in current_tasks[item].keys() %}
+                    <tr>
+                      <td><input name="ID" type="hidden" value="{{item}}">{{item}}</td>
+                      <td><input name="FileName" type="hidden"value="{{key}}"> {{key}}</td>
+                      <td>
+                          {{current_tasks[item][key][0]}}:
+                          <select id="FileType" name="FileType">
+                              <option value="No Change">No Change</option>
+                              <option value="c/c++ binary">c/c++ binary</option>
+                              <option value="Java Archive">Java Archive</option>
+                              <option value="chisel yaml">chisel yaml</option>
+                              <option value="c/c++ source">c/c++ source</option>
+                              <option value="library">library</option>
+                              <option value="gtirb">gtirb</option>
+                          </select>
+                      </td>
+                      <td>
+                          {{current_tasks[item][key][1]}}
+                          <select id="Transform" name="Transform">
+                              <option value="No Change">No Change</option>
+                              <option value="GTIRB-ddisasm">GTIRB-ddisasm</option>
+                              <option value="GTIRB-to-static">GTIRB-to-static</option>
+                              <option value="GTIRB-stack-stamp">GTIRB-stack-stamp</option>
+                              <option value="GTIRB-static-binary-print">GTIRB-static-binary-print</option>
+                              <option value="GTIRB-binary-print">GTIRB-binary-print</option>
+                              <option value="gtirb">gtirb</option>
+                          </select>
+                      </td>
+                      <td><input name="Status" type="hidden" value="{{current_tasks[item][key][2]}}">{{current_tasks[item][key][2]}}</td>
+                      <td><input type="submit" value='Update Entry' id="uploads_table"></td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+          </tbody>
+
+        </form>
+    </table>
+    {% else %}
+    <p>No Files currently uploaded to server for transformation</p>
+    {% endif %}
