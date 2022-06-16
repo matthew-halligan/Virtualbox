@@ -70,13 +70,13 @@
   <p>No Files currently uploaded to server for transformation</p>
   {% endif %}
 
-  <form method="POST" action={{ url_for('download_file') }}>
+  <form method="POST" action=''>
     <p>Enter the ID For Download:</p>
     <input name="id" type="text">
     <input type="submit">
   </form>
 
-  <form method="POST" action={{ url_for('transformation_on_file') }}>
+  <form method="POST" action=''>
     <p>Enter the ID For Transform:</p>
     <input name="id" type="text">
     <select id="transform" name="transform">

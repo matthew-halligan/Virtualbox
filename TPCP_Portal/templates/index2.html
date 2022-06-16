@@ -4,7 +4,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
+  <script src="static/js/jquery.min.js"></script>
+  <script src="{{url_for('static', filename='js/get_update.js')}}">
+      console.log("Executing from head")
+<!--      setIntervalH(updateCounter, 'Status', 500);-->
+  </script>
+  <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
   <title>TPCP Portal</title>
 
   <style>
@@ -20,7 +25,7 @@
   p {
     margin-top: 0;
     margin: auto;
-    color: white;
+    color: black;
     <!--    width: 50%;-->
   }
 
@@ -50,9 +55,10 @@
 
 </style>
 </head>
-<body>
-    <h1>Upload A New Tarball File Containing Desired Binaries</h1>
-    <form class="my-form" onsubmit="upload_file()" enctype="multipart/form-data" method="post">
+<body >
+    <p id="counter">counter: {{counter}}</p>
+    <h1>Select All of the Files You Wish to Upload and Press Submit</h1>
+    <form class="my-form" enctype="multipart/form-data" method="post">
         <input type="hidden" value="UploadFile" name="HiddenField">
         <input type="file"  multiple accept="file_extension", name="files[]">
 
@@ -78,19 +84,20 @@
 
     {% if current_series_ids|length > 0 %}
     <table id="queue">
-        <form method="post" onsubmit="upload_table()">
-            <input type="hidden" value="ModifyFile" name="HiddenField">
-          <thead><tr>
-            <th>IDs</th>
-            <th>Filename</th>
-            <th>File type</th>
-            <th>Transform Running</th>
-            <th>Status</th>
-            <th>Update</th>
-          </tr></thead>
-          <tbody>
-            {% for item in current_series_ids %}
-                {% for key in current_tasks[item].keys() %}
+
+      <thead><tr>
+        <th>IDs</th>
+        <th>Filename</th>
+        <th>File type</th>
+        <th>Transform Running</th>
+        <th>Status</th>
+        <th>Update</th>
+      </tr></thead>
+      <tbody>
+        {% for item in current_series_ids %}
+            {% for key in current_tasks[item].keys() %}
+                <form method="post" onsubmit="upload_table()">
+                    <input type="hidden" value="ModifyFile" name="HiddenField">
                     <tr>
                       <td><input name="ID" type="hidden" value="{{item}}">{{item}}</td>
                       <td><input name="FileName" type="hidden"value="{{key}}"> {{key}}</td>
@@ -118,15 +125,47 @@
                               <option value="gtirb">gtirb</option>
                           </select>
                       </td>
-                      <td><input name="Status" type="hidden" value="{{current_tasks[item][key][2]}}">{{current_tasks[item][key][2]}}</td>
+                      <td id='Status'><input name="Status"  type="hidden" value="{{current_tasks[item][key][2]}}">{{counter}}</td>
+
+<!--                      <td><input name="Status" type="hidden" value="{{current_tasks[item][key][2]}}">{{current_tasks[item][key][2]}}</td>-->
                       <td><input type="submit" value='Update Entry' id="uploads_table"></td>
                     </tr>
-                {% endfor %}
+                </form>
             {% endfor %}
-          </tbody>
-
-        </form>
+        {% endfor %}
+      </tbody>
     </table>
     {% else %}
     <p>No Files currently uploaded to server for transformation</p>
     {% endif %}
+
+
+<!--<script type="text/javascript">-->
+<!--    console.log('Executing on load');-->
+<!--    setIntervalH(UpdateCounter, 'Status', 500, '/api/methods/get_counter');-->
+<!--    console.log('Completed setInterval')-->
+<!--</script>-->
+<script type="text/javascript">
+    function get_server_data(cFunction, htmlID, apiRoute){
+          var server_data=new XMLHttpRequest(cFunction);
+
+          server_data.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                cFunction(this, htmlID);
+                }
+          };
+
+          server_data.open("GET", apiRoute, true);
+          server_data.send(null)
+      }
+
+
+    function UpdateCounter(server_data, htmlID){
+        document.getElementById(htmlID).innerHTML = server_data.responseText;
+    }
+
+    var updateInterval = 500;
+    setInterval(function(){get_server_data(UpdateCounter, "counter", '/api/methods/get_counter')}, updateInterval)
+    setInterval(function(){get_server_data(UpdateCounter, "Status", '/api/methods/get_counter')}, updateInterval)
+
+</script>
