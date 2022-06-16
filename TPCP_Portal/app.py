@@ -11,19 +11,33 @@ if not os.path.isdir(UPLOAD_FOLDER):
     os.mkdir(UPLOAD_FOLDER)
 
 current_tasks = {}
+counter = 0
+
+@app.route('/api/methods/get_counter', methods=["GET"])
+def get_counter():
+    global counter, current_tasks
+    counter += 1
+    return str(counter) + str(current_tasks)
 
 @app.route('/upload')
 def upload():
-    print(len(current_tasks))
-    return render_template("index2.html",
+    if request.method != 'GET':
+        return render_template("index2.html",
+                           current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
+                           current_tasks=current_tasks)
+    global counter
+    counter +=1
+    #TODO: Post terminal updates to the template
+    return render_template("index2.html", counter=counter,
                            current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
                            current_tasks=current_tasks)
 
-@app.route('/upload', methods=['POST'])
+@app.route('/upload', methods=['POST', 'GET'])
 def modify_or_upload_files():
     global current_tasks
-
+    counter = 0
     if request.method != 'POST':
+        print("In not post")
         return render_template("index2.html",
                                current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
                                current_tasks=current_tasks)
@@ -31,10 +45,14 @@ def modify_or_upload_files():
     if request.form['HiddenField'] == 'ModifyFile':
         id = request.form['ID']
         filename = request.form['FileName']
-        filetype = request.form['FileType'] if request.form['FileType'] != 'No Change' else 'Not Specified'
-        transform = request.form['Transform'] if request.form['Transform'] != 'No Change' else 'Not Specified'
+        filetype = request.form['FileType'] if request.form['FileType'] != 'No Change' else get_task_map_id_file_info(id, filename, 0)
+        transform = request.form['Transform'] if request.form['Transform'] != 'No Change' else get_task_map_id_file_info(id, filename, 1)
         status = request.form['Status']
-
+        print(f"id: {id}")
+        print(f"filename: {filename}")
+        print(f"filetype: {filetype}")
+        print(f"transform: {transform}")
+        print(f"status: {status}")
         add_to_task_map(id, filename, transform, filetype, status)
 
         return render_template("index2.html",
@@ -87,6 +105,9 @@ def add_to_task_map(id, filename, transform, filetype, status):
 
 def get_task_map_id(id):
     return current_tasks[id]
+
+def get_task_map_id_file_info(id, filename, index):
+    return current_tasks[id][filename][index]
 
 if __name__ == "__main__":
     print('to upload files navigate to http://10.0.2.15:5000/upload')
