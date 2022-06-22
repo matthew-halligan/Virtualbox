@@ -1,23 +1,24 @@
 import sys, os, re, subprocess
+from api_methods import get_counter, gtirb_ddisasm
 from flask import Flask, render_template, flash, request, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 
 
-UPLOAD_FOLDER='uploads'
+UPLOAD_FOLDER = 'uploads'
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Centralized URL Map
+app.add_url_rule('/api/methods/get_counter', methods=['GET'], view_func=get_counter)
+app.add_url_rule('/api/methods/gtirb_ddisasm', methods=['GET'], view_func=gtirb_ddisasm)
+
 # Check that the upload folder exists
 if not os.path.isdir(UPLOAD_FOLDER):
     os.mkdir(UPLOAD_FOLDER)
 
 current_tasks = {}
+global counter
 counter = 0
-
-@app.route('/api/methods/get_counter', methods=["GET"])
-def get_counter():
-    global counter, current_tasks
-    counter += 1
-    return str(counter) + str(current_tasks)
 
 @app.route('/upload')
 def upload():
@@ -95,8 +96,8 @@ def modify_or_upload_files():
 
 def add_to_task_map(id, filename, transform, filetype, status):
     # Task Map Structure is as follows
-    # { id:[filename, filetype, transform, status], ...,
-    #   id+n:[filename, filetype, transform, status] }
+    # { id:{filename: [filetype, transform, status]}, ...,
+    #   id+n:{filename: [filetype, transform, status]} }
     try:
         current_tasks[id][filename] = [filetype, transform, status]
     except KeyError:
