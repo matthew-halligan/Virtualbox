@@ -11,7 +11,7 @@ def get_counter():
     # Task Map Structure is as follows
     # { id:{filename: [filetype, transform, status]}, ...,
     #   id+n:{filename: [filetype, transform, status]} }
-def gtirb_ddisasm(uploads_id):
+def gtirb_ddisasm(uploads_i_ddisasm):
     """
     uploads_id:
 
