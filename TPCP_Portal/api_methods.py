@@ -1,16 +1,17 @@
 #import requests as re
-import os.path
+import global_items as gi
+import os
 
 
 def get_counter():
-    global counter, current_tasks
-    counter += 1
-    return str(counter) + str(current_tasks)
+    # gi.counter, gi.current_tasks
+    gi.counter += 1
+    return str(gi.counter) + str(gi.current_tasks)
 
- # Task Map Structure is as follows
+    # Task Map Structure is as follows
     # { id:{filename: [filetype, transform, status]}, ...,
     #   id+n:{filename: [filetype, transform, status]} }
-def gtirb_ddisasm(uploads_id, task_map, ):
+def gtirb_ddisasm(uploads_id,):
     """
     uploads_id:
 

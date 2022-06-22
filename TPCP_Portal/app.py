@@ -1,5 +1,8 @@
-import sys, os, re, subprocess
-from api_methods import get_counter, gtirb_ddisasm
+import sys, os, re, subprocess, global_items
+import global_items as gi
+
+
+import api_methods #import get_counter, gtirb_ddisasm
 from flask import Flask, render_template, flash, request, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 
@@ -9,16 +12,14 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Centralized URL Map
-app.add_url_rule('/api/methods/get_counter', methods=['GET'], view_func=get_counter)
-app.add_url_rule('/api/methods/gtirb_ddisasm', methods=['GET'], view_func=gtirb_ddisasm)
+app.add_url_rule('/api/methods/get_counter', methods=['GET'], view_func=api_methods.get_counter)
+app.add_url_rule('/api/methods/gtirb_ddisasm', methods=['GET'], view_func=api_methods.gtirb_ddisasm)
 
 # Check that the upload folder exists
 if not os.path.isdir(UPLOAD_FOLDER):
     os.mkdir(UPLOAD_FOLDER)
 
-current_tasks = {}
-global counter
-counter = 0
+
 
 @app.route('/upload')
 def upload():
