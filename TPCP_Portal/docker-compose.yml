@@ -20,7 +20,7 @@ services:
       net:
         ipv4_address: 172.20.0.6
   flask-app:
-    image: flaskexperiment:v1
+    image: tpcp_portal:v2
     #stdin_open: true
     #tty: true
     container_name: flaskapp

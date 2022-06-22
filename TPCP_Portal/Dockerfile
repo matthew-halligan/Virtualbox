@@ -5,6 +5,7 @@ WORKDIR /app
 
 COPY app.py /app
 ADD templates /app/templates
+ADD static /app/static
 COPY requirements.txt /app
 COPY gtirb.sh /app
 
