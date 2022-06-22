@@ -26,13 +26,13 @@ def upload():
     if request.method != 'GET':
         return render_template("index2.html",
                            current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
-                           current_tasks=current_tasks)
+                           current_tasks=gi.current_tasks)
     global counter
-    counter +=1
+    gi.counter +=1
     #TODO: Post terminal updates to the template
-    return render_template("index2.html", counter=counter,
+    return render_template("index2.html", counter=gi.counter,
                            current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
-                           current_tasks=current_tasks)
+                           current_tasks=gi.current_tasks)
 
 @app.route('/upload', methods=['POST', 'GET'])
 def modify_or_upload_files():
@@ -42,7 +42,7 @@ def modify_or_upload_files():
         print("In not post")
         return render_template("index2.html",
                                current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
-                               current_tasks=current_tasks)
+                               current_tasks=gi.current_tasks)
 
     if request.form['HiddenField'] == 'ModifyFile':
         id = request.form['ID']
@@ -50,6 +50,7 @@ def modify_or_upload_files():
         filetype = request.form['FileType'] if request.form['FileType'] != 'No Change' else get_task_map_id_file_info(id, filename, 0)
         transform = request.form['Transform'] if request.form['Transform'] != 'No Change' else get_task_map_id_file_info(id, filename, 1)
         status = request.form['Status']
+        # status = ""
         print(f"id: {id}")
         print(f"filename: {filename}")
         print(f"filetype: {filetype}")
@@ -59,7 +60,7 @@ def modify_or_upload_files():
 
         return render_template("index2.html",
                                current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
-                               current_tasks=current_tasks)
+                               current_tasks=gi.current_tasks)
     elif request.form['HiddenField'] == 'UploadFile':
         try:
             current_series_ids = sorted(os.listdir(app.config['UPLOAD_FOLDER']))
@@ -92,7 +93,7 @@ def modify_or_upload_files():
                 add_to_task_map(id, filename, transform, filetype, status)
         return render_template("index2.html", id=id,
                        current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
-                       current_tasks=current_tasks)
+                       current_tasks=gi.current_tasks)
 
 
 def add_to_task_map(id, filename, transform, filetype, status):
@@ -100,16 +101,16 @@ def add_to_task_map(id, filename, transform, filetype, status):
     # { id:{filename: [filetype, transform, status]}, ...,
     #   id+n:{filename: [filetype, transform, status]} }
     try:
-        current_tasks[id][filename] = [filetype, transform, status]
+        gi.current_tasks[id][filename] = [filetype, transform, status]
     except KeyError:
-        current_tasks[id] = {filename: [filetype, transform, status]}
+        gi.current_tasks[id] = {filename: [filetype, transform, status]}
 
 
 def get_task_map_id(id):
-    return current_tasks[id]
+    return gi.current_tasks[id]
 
 def get_task_map_id_file_info(id, filename, index):
-    return current_tasks[id][filename][index]
+    return gi.current_tasks[id][filename][index]
 
 if __name__ == "__main__":
     print('to upload files navigate to http://10.0.2.15:5000/upload')
