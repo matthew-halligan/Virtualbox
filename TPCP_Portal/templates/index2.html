@@ -29,23 +29,23 @@
     <!--    width: 50%;-->
   }
 
-  #queue {
+  .queue {
     font-family: Arial, Helvetica, sans-serif;
     border-collapse: collapse;
     width: 100%;
   }
 
-  #queue td, #customers th {
+  .queue td, #customers th {
     border: 1px solid #ddd;
     padding: 8px;
     color: black;
   }
 
-  #queue tr:nth-child(even){background-color: #f2f2f2;}
+  .queue tr:nth-child(even){background-color: #f2f2f2;}
 
-  #queue tr:hover {background-color: #ddd;}
+  .queue tr:hover {background-color: #ddd;}
 
-  #queue th {
+  .queue th {
     padding-top: 12px;
     padding-bottom: 12px;
     text-align: left;
@@ -66,12 +66,12 @@
         <p>Adding to a previous job or new job?</p>
          <label for="ID">Choose an ID:</label>
          <select id="ID" name="JobID">
-            <option value="New Job">New Job</option>
-            {% if current_series_ids|length > 0 %}
-               {% for item in current_series_ids %}
-                 <option value={{item}}>ID: {{item}}</option>
-               {% endfor %}
-            {% endif %}
+             <option value="New Job">New Job</option>
+             {% if current_series_ids|length > 0 %}
+                {% for item in current_series_ids %}
+                    <option value={{item}}>ID: {{item}}</option>
+                {% endfor %}
+             {% endif %}
          </select>
         <br><br>
         <input type="submit" id="upload_files">
@@ -83,60 +83,59 @@
     {% endif %}
 
     {% if current_series_ids|length > 0 %}
-    <table id="queue">
-
-      <thead><tr>
-        <th>IDs</th>
-        <th>Filename</th>
-        <th>File type</th>
-        <th>Transform Running</th>
-        <th>Status</th>
-        <th>Update</th>
-      </tr></thead>
-      <tbody>
         {% for item in current_series_ids %}
-            {% for key in current_tasks[item].keys() %}
-                <form method="post" onsubmit="upload_table()">
-                    <input type="hidden" value="ModifyFile" name="HiddenField">
-                    <tr>
-                      <td><input name="ID" type="hidden" value="{{item}}">{{item}}</td>
-                      <td><input name="FileName" type="hidden"value="{{key}}"> {{key}}</td>
-                      <td>
-                          {{current_tasks[item][key][0]}}:
-                          <select id="FileType" name="FileType">
-                              <option value="No Change">No Change</option>
-                              <option value="c/c++ binary">c/c++ binary</option>
-                              <option value="Java Archive">Java Archive</option>
-                              <option value="chisel yaml">chisel yaml</option>
-                              <option value="c/c++ source">c/c++ source</option>
-                              <option value="library">library</option>
-                              <option value="gtirb">gtirb</option>
-                          </select>
-                      </td>
-                      <td>
-                          {{current_tasks[item][key][1]}}
-                          <select id="Transform" name="Transform">
-                              <option value="No Change">No Change</option>
-                              <option value="GTIRB-ddisasm">GTIRB-ddisasm</option>
-                              <option value="GTIRB-to-static">GTIRB-to-static</option>
-                              <option value="GTIRB-stack-stamp">GTIRB-stack-stamp</option>
-                              <option value="GTIRB-static-binary-print">GTIRB-static-binary-print</option>
-                              <option value="GTIRB-binary-print">GTIRB-binary-print</option>
-                              <option value="gtirb">gtirb</option>
-                          </select>
-                      </td>
-                      <td id='Status'><input name="Status"  type="hidden" value="{{current_tasks[item][key][2]}}">{{counter}}</td>
+            <table class="queue">
+                <thead><tr>
+                    <th>IDs</th>
+                    <th>Filename</th>
+                    <th>File type</th>
+                    <th>Transform Running</th>
+                    <th>Status</th>
+                    <th>Update</th>
+                  </tr></thead>
+                <tbody>
+                    {% for key in current_tasks[item].keys() %}
+                        <form method="post" onsubmit="upload_table()">
+                            <input type="hidden" value="ModifyFile" name="HiddenField">
+                            <tr>
+                                <td><input name="ID" type="hidden" value="{{item}}">{{item}}</td>
+                                <td><input name="FileName" type="hidden"value="{{key}}"> {{key}}</td>
+                                <td>
+                                    {{current_tasks[item][key][0]}}:
+                                    <select id="FileType" name="FileType">
+                                        <option value="No Change">No Change</option>
+                                        <option value="c/c++ binary">c/c++ binary</option>
+                                        <option value="Java Archive">Java Archive</option>
+                                        <option value="chisel yaml">chisel yaml</option>
+                                        <option value="c/c++ source">c/c++ source</option>
+                                        <option value="library">library</option>
+                                        <option value="gtirb">gtirb</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    {{current_tasks[item][key][1]}}
+                                    <select id="Transform" name="Transform">
+                                        <option value="No Change">No Change</option>
+                                        <option value="GTIRB-ddisasm">GTIRB-ddisasm</option>
+                                        <option value="GTIRB-to-static">GTIRB-to-static</option>
+                                        <option value="GTIRB-stack-stamp">GTIRB-stack-stamp</option>
+                                        <option value="GTIRB-static-binary-print">GTIRB-static-binary-print</option>
+                                        <option value="GTIRB-binary-print">GTIRB-binary-print</option>
+                                        <option value="gtirb">gtirb</option>
+                                    </select>
+                                </td>
+                                <td id="Status-TD"><input name="Status" id="Status" type="hidden" value="{{counter}}">{{counter}}</td>
 
-<!--                      <td><input name="Status" type="hidden" value="{{current_tasks[item][key][2]}}">{{current_tasks[item][key][2]}}</td>-->
-                      <td><input type="submit" value='Update Entry' id="uploads_table"></td>
-                    </tr>
-                </form>
-            {% endfor %}
+            <!--                      <td><input name="Status" type="hidden" value="{{current_tasks[item][key][2]}}">{{current_tasks[item][key][2]}}</td>-->
+                                <td><input type="submit" value='Update Entry' id="uploads_table"></td>
+                            </tr>
+                        </form>
+                    {% endfor %}
+                  </tbody>
+            </table>
         {% endfor %}
-      </tbody>
-    </table>
     {% else %}
-    <p>No Files currently uploaded to server for transformation</p>
+        <p>No Files currently uploaded to server for transformation</p>
     {% endif %}
 
 
@@ -163,9 +162,13 @@
     function UpdateCounter(server_data, htmlID){
         document.getElementById(htmlID).innerHTML = server_data.responseText;
     }
+    function UpdateForm(server_data, htmlID){
+        document.getElementById(htmlID+"-TD").innerHTML = "<input name='"+ htmlID +"' id='"+ htmlID +"' type='hidden' value=''>" + server_data.responseText;
+        document.getElementById(htmlID).value = server_data.responseText;
+    }
 
-    var updateInterval = 500;
+    var updateInterval = 5000;
     setInterval(function(){get_server_data(UpdateCounter, "counter", '/api/methods/get_counter')}, updateInterval)
-    setInterval(function(){get_server_data(UpdateCounter, "Status", '/api/methods/get_counter')}, updateInterval)
+    setInterval(function(){get_server_data(UpdateForm, "Status", '/api/methods/get_counter')}, updateInterval)
 
 </script>
