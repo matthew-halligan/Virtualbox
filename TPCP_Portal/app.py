@@ -50,6 +50,7 @@ def modify_or_upload_files():
         filetype = request.form['FileType'] if request.form['FileType'] != 'No Change' else get_task_map_id_file_info(id, filename, 0)
         transform = request.form['Transform'] if request.form['Transform'] != 'No Change' else get_task_map_id_file_info(id, filename, 1)
         status = request.form['Status']
+        job_status = "Must Pipe Output"
         # status = ""
         print(f"id: {id}")
         print(f"filename: {filename}")
@@ -57,7 +58,7 @@ def modify_or_upload_files():
         print(f"transform: {transform}")
         print(f"status: {status}")
         add_to_task_map(id, filename, transform, filetype, status)
-
+        update_job_info(id, transform, job_status)
         return render_template("index2.html",
                                current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
                                current_tasks=gi.current_tasks)
@@ -96,14 +97,25 @@ def modify_or_upload_files():
                        current_tasks=gi.current_tasks)
 
 
+def update_job_info(id, job_transform, job_status):
+    try:
+        if job_transform != "No Change":
+            gi.current_tasks[id]["JobInfo"][0] = job_transform
+        if job_status != "None To Report":
+            gi.current_tasks[id]["JobInfo"][1] = job_status
+    except KeyError as e:
+        print(e)
+
+
 def add_to_task_map(id, filename, transform, filetype, status):
     # Task Map Structure is as follows
-    # { id:{filename: [filetype, transform, status]}, ...,
-    #   id+n:{filename: [filetype, transform, status]} }
+    # { id:{filename: [filetype, transform, status], "JobInfo": [transform, status]}, ...,
+    #   id+n:{filename: [filetype, transform, status], "JobInfo": [transform, status]} }
     try:
         gi.current_tasks[id][filename] = [filetype, transform, status]
+
     except KeyError:
-        gi.current_tasks[id] = {filename: [filetype, transform, status]}
+        gi.current_tasks[id] = {filename: [filetype, transform, status], "JobInfo": [transform, "None To Report"]}
 
 
 def get_task_map_id(id):

@@ -89,12 +89,13 @@
                     <th>IDs</th>
                     <th>Filename</th>
                     <th>File type</th>
-                    <th>Transform Running</th>
+                    <th>Transform To Run</th>
                     <th>Status</th>
                     <th>Update</th>
                   </tr></thead>
                 <tbody>
                     {% for key in current_tasks[item].keys() %}
+                    {% if key != "JobInfo" %}
                         <form method="post" onsubmit="upload_table()">
                             <input type="hidden" value="ModifyFile" name="HiddenField">
                             <tr>
@@ -130,7 +131,28 @@
                                 <td><input type="submit" value='Update Entry' id="uploads_table"></td>
                             </tr>
                         </form>
+                    {% endif %}
                     {% endfor %}
+                    <thead><tr>
+                        <th>Job ID</th>
+                        <th></th>
+                        <th></th>
+                        <th>Transform(s) Running</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr></thead>
+                    <tr>
+                        <td id="JobID">{{item}}</td>
+                        <td></td>
+                        <td></td>
+                        <td id="JobTransform">{{current_tasks[item]["JobInfo"][0]}}</td>
+                        <td id="JobStatus">{{current_tasks[item]["JobInfo"][1]}}</td>
+
+                        <form method="post">
+                            <td><input type="submit" value="Submit Job" id="{{item}}"></td>
+                        </form>
+                    </tr>
+
                   </tbody>
             </table>
         {% endfor %}
@@ -168,7 +190,7 @@
     }
 
     var updateInterval = 5000;
-    setInterval(function(){get_server_data(UpdateCounter, "counter", '/api/methods/get_counter')}, updateInterval)
-    setInterval(function(){get_server_data(UpdateForm, "Status", '/api/methods/get_counter')}, updateInterval)
+    setInterval(function(){get_server_data(UpdateCounter, "JobStatus", '/api/methods/get_counter')}, updateInterval)
+<!--    setInterval(function(){get_server_data(UpdateForm, "JobStatus", '/api/methods/get_counter')}, updateInterval)-->
 
 </script>
