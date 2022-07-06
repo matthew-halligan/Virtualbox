@@ -33,8 +33,22 @@ services:
     ports:
       - "5000:5000"  
     volumes:
-      - /tmp/uploads:/app/uploads
+#      - /tmp/uploads:/app/uploads
       - ./:/app
+  gsa:
+    image: ijustincabral/gsa:beta
+    container_name: gsa
+    # ports:
+    #  - "81:80"
+    hostname: gsa
+    stdin_open: true
+    tty: true
+    networks:
+      net:
+        ipv4_address: 172.20.0.8
+    volumes:
+      - ./uploads:/GadgetSetAnalyzer/src/uploads
+
 
 networks:
   net:

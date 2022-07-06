@@ -16,10 +16,12 @@ def gtirb_ddisasm(uploads_i_ddisasm):
     uploads_id:
 
     """
-    user_space = os.path.join('uploads', str(uploads_id))
+    user_space = os.path.join('uploads', str(uploads_i_ddisasm))
     gtirb_url = "gtirb/simple"
     # files = {}
     # for filename in task_map.keys():
     #     files[filename] = open(os.path.join(user_space, filename), 'rb')
     # file = {filename: open(os.path.join(user_space, filename), 'rb')}
     raise NotImplementedError
+
+
