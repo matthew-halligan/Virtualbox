@@ -1,2 +1,3 @@
 curl -F transform=to-static -F binary=@$(which ls) $(ldd $(which ls) | \
-grep -v vdso | sed 's|^[^/]*/lib|/lib|;s/^[[:space:]]*//;s/ .*$//'|sed 's/^/-F library=@/')  --output ls.ts.gtirb http://172.20.0.6/simple --trace-ascii -
+grep -v vdso | sed 's|^[^/]*/lib|/lib|;s/^[[:space:]]*//;s/ .*$//'| \
+sed 's/^/-F library=@/')  --output ls.ts.gtirb http://172.20.0.6/simple --trace-ascii -
