@@ -38,8 +38,8 @@ services:
   gsa:
     image: ijustincabral/gsa:beta
     container_name: gsa
-    # ports:
-    #  - "81:80"
+    ports:
+      - "6000:6000"
     hostname: gsa
     stdin_open: true
     tty: true
@@ -48,7 +48,8 @@ services:
         ipv4_address: 172.20.0.8
     volumes:
       - ./uploads:/GadgetSetAnalyzer/src/uploads
-
+      # -./gsa-server:/GadgetSetAnalyzer/src/server need to create this folder locally and move server.py & run-gsa.py under GSA to it
+    # command: bash -c "python3 server/server.py" implement this command after moving files to proper location
 
 networks:
   net:
