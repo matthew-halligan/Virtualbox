@@ -96,6 +96,11 @@ def modify_or_upload_files():
                        current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
                        current_tasks=gi.current_tasks)
 
+    elif request.form['HiddenField'] == 'RunJob':
+        api_methods.gtirb_ddisasm("1")
+        return render_template("index2.html",
+                               current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
+                               current_tasks=gi.current_tasks)
 
 def update_job_info(id, job_transform, job_status):
     try:

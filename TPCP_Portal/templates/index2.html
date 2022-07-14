@@ -149,6 +149,7 @@
                         <td id="JobStatus">{{current_tasks[item]["JobInfo"][1]}}</td>
 
                         <form method="post">
+                            <input type="hidden" value="RunJob" name="HiddenField">
                             <td><input type="submit" value="Submit Job" id="{{item}}"></td>
                         </form>
                     </tr>
