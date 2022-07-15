@@ -48,8 +48,8 @@ services:
         ipv4_address: 172.20.0.8
     volumes:
       - ./uploads:/GadgetSetAnalyzer/src/uploads
-      # -./gsa-server:/GadgetSetAnalyzer/src/server need to create this folder locally and move server.py & run-gsa.py under GSA to it
-    # command: bash -c "python3 server/server.py" implement this command after moving files to proper location
+      - ./gsa-server:/GadgetSetAnalyzer/src/server
+    command: bash -c "python3 server/server.py"
 
 networks:
   net:
