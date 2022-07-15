@@ -11,7 +11,7 @@
   </script>
   <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
   <title>TPCP Portal</title>
-
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
   <style>
   body {
     background-color: white;
@@ -55,9 +55,11 @@
 
 </style>
 </head>
-<body >
+<body>
+    {% include 'nav.html' %}
+    <h3>GTIRB Transforms</h3>
     <p id="counter">counter: {{counter}}</p>
-    <h1>Select All of the Files You Wish to Upload and Press Submit</h1>
+    <h4>Select All of the Files You Wish to Upload and Press Submit</h4>
     <form class="my-form" enctype="multipart/form-data" method="post">
         <input type="hidden" value="UploadFile" name="HiddenField">
         <input type="file"  multiple accept="file_extension", name="files[]">
@@ -190,7 +192,7 @@
         document.getElementById(htmlID).value = server_data.responseText;
     }
 
-    var updateInterval = 5000;
+    var updateInterval = 500000;
     setInterval(function(){get_server_data(UpdateCounter, "JobStatus", '/api/methods/get_counter')}, updateInterval)
 <!--    setInterval(function(){get_server_data(UpdateForm, "JobStatus", '/api/methods/get_counter')}, updateInterval)-->
 
