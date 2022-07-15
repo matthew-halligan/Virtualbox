@@ -6,12 +6,14 @@ import api_methods #import get_counter, gtirb_ddisasm
 import client
 
 from flask import Flask, render_template, flash, request, redirect
+from flask_navigation import Navigation
 from werkzeug.utils import secure_filename
 
 
 UPLOAD_FOLDER = 'uploads'
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+nav = Navigation(app)
 
 # Centralized URL Map
 app.add_url_rule('/api/methods/get_counter', methods=['GET'], view_func=api_methods.get_counter)
@@ -23,26 +25,26 @@ if not os.path.isdir(UPLOAD_FOLDER):
 
 
 
-@app.route('/upload')
+@app.route('/upload_gtirb')
 def upload():
     if request.method != 'GET':
-        return render_template("index2.html",
+        return render_template("gtirb_upload.html",
                            current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
                            current_tasks=gi.current_tasks)
     global counter
     gi.counter +=1
     #TODO: Post terminal updates to the template
-    return render_template("index2.html", counter=gi.counter,
+    return render_template("gtirb_upload.html", counter=gi.counter,
                            current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
                            current_tasks=gi.current_tasks)
 
-@app.route('/upload', methods=['POST', 'GET'])
+@app.route('/upload_gtirb', methods=['POST', 'GET'])
 def modify_or_upload_files():
     global current_tasks
     counter = 0
     if request.method != 'POST':
         print("In not post")
-        return render_template("index2.html",
+        return render_template("gtirb_upload.html",
                                current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
                                current_tasks=gi.current_tasks)
 
@@ -61,7 +63,7 @@ def modify_or_upload_files():
         print(f"status: {status}")
         add_to_task_map(id, filename, transform, filetype, status)
         update_job_info(id, transform, job_status)
-        return render_template("index2.html",
+        return render_template("gtirb_upload.html",
                                current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
                                current_tasks=gi.current_tasks)
     elif request.form['HiddenField'] == 'UploadFile':
@@ -94,15 +96,25 @@ def modify_or_upload_files():
                 transform = "Not Specified"
                 filetype, status = "Not Specified", 'fine'
                 add_to_task_map(id, filename, transform, filetype, status)
-        return render_template("index2.html", id=id,
+        return render_template("gtirb_upload.html", id=id,
                        current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
                        current_tasks=gi.current_tasks)
 
     elif request.form['HiddenField'] == 'RunJob':
-        api_methods.gtirb_ddisasm("1")
-        return render_template("index2.html",
+        reduced_file, origin_file, id = api_methods.gtirb_ddisasm("1")
+
+        # client.jfjf(id, reduced_file, origin_file)
+
+        return render_template("gtirb_upload.html",
                                current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
                                current_tasks=gi.current_tasks)
+
+@app.route('/upload_chisel', methods=['POST', 'GET'])
+def upload_chisel():
+    return render_template("chisel_upload.html",
+                           current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
+                           current_tasks=gi.current_tasks)
+
 
 def update_job_info(id, job_transform, job_status):
     try:
@@ -132,5 +144,5 @@ def get_task_map_id_file_info(id, filename, index):
     return gi.current_tasks[id][filename][index]
 
 if __name__ == "__main__":
-    print('to upload files navigate to http://10.0.2.15:5000/upload')
+    print('to upload files navigate to http://10.0.2.15:5000/upload_gtirb')
     app.run(host='10.0.2.15', port=5000, debug=True, threaded=True)
