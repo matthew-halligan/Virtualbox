@@ -6,7 +6,8 @@ PORT = 6000  # The port used by the server GSA container
 BUFFER_SIZE = 1 #One byte needed for indexes 0-255
 
 #This would be the index inside the uploads folder
-i = int(sys.argv[1])
+# i = int(sys.argv[1])
+i=1
 index_encoded = str(i).encode()
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:

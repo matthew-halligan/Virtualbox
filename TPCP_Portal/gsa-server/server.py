@@ -28,7 +28,7 @@ while True:
         print("")
 
         #Tell container to run the GSA with the passed index
-        os.system(f"python3 server/run-gsa.py {decoded_data}")
+        os.system(f"python3 server/run_gsa.py {decoded_data}")
         conn.send(data)
 
     conn.close()
