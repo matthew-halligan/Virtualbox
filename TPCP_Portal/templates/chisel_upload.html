@@ -1,0 +1,199 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="static/js/jquery.min.js"></script>
+  <script src="{{url_for('static', filename='js/get_update.js')}}">
+      console.log("Executing from head")
+<!--      setIntervalH(updateCounter, 'Status', 500);-->
+  </script>
+  <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+  <title>TPCP Portal</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+  <style>
+  body {
+    background-color: white;
+    font-family: 'Scope One', serif;
+  }
+
+  span {
+    font-size: 9
+  }
+
+  p {
+    margin-top: 0;
+    margin: auto;
+    color: black;
+    <!--    width: 50%;-->
+  }
+
+  .queue {
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  .queue td, #customers th {
+    border: 1px solid #ddd;
+    padding: 8px;
+    color: black;
+  }
+
+  .queue tr:nth-child(even){background-color: #f2f2f2;}
+
+  .queue tr:hover {background-color: #ddd;}
+
+  .queue th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #04AA6D;
+    color: white;
+  }
+
+</style>
+</head>
+<body>
+    {% include 'nav.html' %}
+    <h3>Chisel Transformation Tool</h3>
+    <p id="counter">counter: {{counter}}</p>
+    <h4>Select All of the Files You Wish to Upload and Press Submit</h4>
+    <form class="my-form" enctype="multipart/form-data" method="post">
+        <input type="hidden" value="UploadFile" name="HiddenField">
+        <input type="file"  multiple accept="file_extension", name="files[]">
+
+        <br><br>
+        <p>Adding to a previous job or new job?</p>
+         <label for="ID">Choose an ID:</label>
+         <select id="ID" name="JobID">
+             <option value="New Job">New Job</option>
+             {% if current_series_ids|length > 0 %}
+                {% for item in current_series_ids %}
+                    <option value={{item}}>ID: {{item}}</option>
+                {% endfor %}
+             {% endif %}
+         </select>
+        <br><br>
+        <input type="submit" id="upload_files">
+    </form>
+    <progress id="progress-bar" max="100" value="10"></progress>
+
+    {% if id %}
+    <p>The Id of your task is: {{id}}</p>
+    {% endif %}
+
+    {% if current_series_ids|length > 0 %}
+        {% for item in current_series_ids %}
+            <table class="queue">
+                <thead><tr>
+                    <th>IDs</th>
+                    <th>Filename</th>
+                    <th>File type</th>
+                    <th>Transform To Run</th>
+                    <th>Status</th>
+                    <th>Update</th>
+                  </tr></thead>
+                <tbody>
+                    {% for key in current_tasks[item].keys() %}
+                    {% if key != "JobInfo" %}
+                        <form method="post" onsubmit="upload_table()">
+                            <input type="hidden" value="ModifyFile" name="HiddenField">
+                            <tr>
+                                <td><input name="ID" type="hidden" value="{{item}}">{{item}}</td>
+                                <td><input name="FileName" type="hidden"value="{{key}}"> {{key}}</td>
+                                <td>
+                                    {{current_tasks[item][key][0]}}:
+                                    <select id="FileType" name="FileType">
+                                        <option value="No Change">No Change</option>
+                                        <option value="c/c++ binary">c/c++ binary</option>
+                                        <option value="Java Archive">Java Archive</option>
+                                        <option value="chisel yaml">chisel yaml</option>
+                                        <option value="c/c++ source">c/c++ source</option>
+                                        <option value="library">library</option>
+                                        <option value="gtirb">gtirb</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    {{current_tasks[item][key][1]}}
+                                    <select id="Transform" name="Transform">
+                                        <option value="No Change">No Change</option>
+                                        <option value="GTIRB-ddisasm">GTIRB-ddisasm</option>
+                                        <option value="GTIRB-to-static">GTIRB-to-static</option>
+                                        <option value="GTIRB-stack-stamp">GTIRB-stack-stamp</option>
+                                        <option value="GTIRB-static-binary-print">GTIRB-static-binary-print</option>
+                                        <option value="GTIRB-binary-print">GTIRB-binary-print</option>
+                                        <option value="gtirb">gtirb</option>
+                                    </select>
+                                </td>
+                                <td id="Status-TD"><input name="Status" id="Status" type="hidden" value="{{counter}}">{{counter}}</td>
+
+            <!--                      <td><input name="Status" type="hidden" value="{{current_tasks[item][key][2]}}">{{current_tasks[item][key][2]}}</td>-->
+                                <td><input type="submit" value='Update Entry' id="uploads_table"></td>
+                            </tr>
+                        </form>
+                    {% endif %}
+                    {% endfor %}
+                    <thead><tr>
+                        <th>Job ID</th>
+                        <th></th>
+                        <th></th>
+                        <th>Transform(s) Running</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr></thead>
+                    <tr>
+                        <td id="JobID">{{item}}</td>
+                        <td></td>
+                        <td></td>
+                        <td id="JobTransform">{{current_tasks[item]["JobInfo"][0]}}</td>
+                        <td id="JobStatus">{{current_tasks[item]["JobInfo"][1]}}</td>
+
+                        <form method="post">
+                            <input type="hidden" value="RunJob" name="HiddenField">
+                            <td><input type="submit" value="Submit Job" id="{{item}}"></td>
+                        </form>
+                    </tr>
+
+                  </tbody>
+            </table>
+        {% endfor %}
+    {% else %}
+        <p>No Files currently uploaded to server for transformation</p>
+    {% endif %}
+
+
+<!--<script type="text/javascript">-->
+<!--    console.log('Executing on load');-->
+<!--    setIntervalH(UpdateCounter, 'Status', 500, '/api/methods/get_counter');-->
+<!--    console.log('Completed setInterval')-->
+<!--</script>-->
+<script type="text/javascript">
+    function get_server_data(cFunction, htmlID, apiRoute){
+          var server_data=new XMLHttpRequest(cFunction);
+
+          server_data.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                cFunction(this, htmlID);
+                }
+          };
+
+          server_data.open("GET", apiRoute, true);
+          server_data.send(null)
+      }
+
+
+    function UpdateCounter(server_data, htmlID){
+        document.getElementById(htmlID).innerHTML = server_data.responseText;
+    }
+    function UpdateForm(server_data, htmlID){
+        document.getElementById(htmlID+"-TD").innerHTML = "<input name='"+ htmlID +"' id='"+ htmlID +"' type='hidden' value=''>" + server_data.responseText;
+        document.getElementById(htmlID).value = server_data.responseText;
+    }
+
+    var updateInterval = 500000;
+    setInterval(function(){get_server_data(UpdateCounter, "JobStatus", '/api/methods/get_counter')}, updateInterval)
+<!--    setInterval(function(){get_server_data(UpdateForm, "JobStatus", '/api/methods/get_counter')}, updateInterval)-->
+
+</script>
