@@ -1,0 +1,20 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <h5 style="padding-left ">TPCP Portal <img src="{{ url_for('static', filename='images/favicon.ico') }}"></h5>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('upload') }}">GTIRB <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('upload_chisel')}}">Chisel</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link">Second Page</a>
+            </li>
+        </ul>
+    </div>
+</nav>
