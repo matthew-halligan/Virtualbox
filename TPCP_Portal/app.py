@@ -1,9 +1,11 @@
-import sys, os, re, subprocess, global_items
+import sys, os
 import global_items as gi
 
 
 import api_methods #import get_counter, gtirb_ddisasm
-from flask import Flask, render_template, flash, request, redirect, url_for, send_from_directory
+import client
+
+from flask import Flask, render_template, flash, request, redirect
 from werkzeug.utils import secure_filename
 
 
