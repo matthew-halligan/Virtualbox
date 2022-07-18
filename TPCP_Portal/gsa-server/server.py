@@ -1,8 +1,13 @@
 import socket
 import os
+import sys
 
-HOST = "172.20.0.8" #This would be the server IP based on the docker-compose.yml
-PORT = 6000 #This would be the exposed port that we're communicating on
+parent_dir = "/home/tpcp/Desktop/Virtualbox/TPCP_Portal"
+sys.path.append(parent_dir)
+import global_items as gi
+
+HOST = gi.IP_HOST_GSA #This would be the server IP based on the docker-compose.yml
+PORT = gi.PORT_HOST_GSA #This would be the exposed port that we're communicating on
 BUFFER_SIZE = 1 #In bytes (Only need 1 byte for indexes 0-255. Small buffer = fast read/writes)
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -19,7 +24,7 @@ while True:
     while True:
         data = conn.recv(BUFFER_SIZE)
         if not data: break
-        print (f"Data Received: {data}"),data
+        print(f"Data Received: {data}"), data
         print("")
         decoded_data = data.decode("utf-8")
         print(f"Data Decoded: {decoded_data}")
