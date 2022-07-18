@@ -59,6 +59,7 @@ def modify_or_upload_files():
         print(f"filetype: {filetype}")
         print(f"transform: {transform}")
         print(f"status: {status}")
+        transform
         add_to_task_map(id, filename, transform, filetype, status)
         update_job_info(id, transform, job_status)
         return render_template("gtirb_upload.html",
@@ -99,8 +100,8 @@ def modify_or_upload_files():
                        current_tasks=gi.current_tasks)
 
     elif request.form['HiddenField'] == 'RunJob':
-        api_methods.gtirb_ddisasm("1")
-
+        status, message, original_bin, transformed_bin, transformed_bin_type = api_methods.gtirb_run_transform_set("1")
+        # run_gsa()
         return render_template("gtirb_upload.html",
                                current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
                                current_tasks=gi.current_tasks)
