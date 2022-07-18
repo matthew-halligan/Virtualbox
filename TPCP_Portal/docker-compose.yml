@@ -14,7 +14,7 @@ services:
     image: grammatech/gtirb-server
     container_name: gtirb
     ports: 
-      - "81:80"
+      - "80:80"
     hostname: gtirb    
     networks:
       net:

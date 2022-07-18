@@ -20,7 +20,7 @@ def gtirb_ddisasm(uploads_id):
     uploads_id:
 
     """
-    gtirb_url = 'http://172.17.0.1/simple'.encode("utf8").strip()
+    gtirb_url = f'http://{gi.IP_HOST_GTIRB}/simple'.encode("utf8").strip()
 
     user_space = os.path.join('uploads', str(uploads_id))
     files = [("binary", ("ls", open("/bin/ls", "rb")))  # ,

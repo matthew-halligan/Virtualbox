@@ -2,18 +2,16 @@ import sys, os
 import global_items as gi
 
 
-import api_methods #import get_counter, gtirb_ddisasm
+import api_methods
 import client
 
 from flask import Flask, render_template, flash, request, redirect
-from flask_navigation import Navigation
 from werkzeug.utils import secure_filename
 
 
 UPLOAD_FOLDER = 'uploads'
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-nav = Navigation(app)
 
 # Centralized URL Map
 app.add_url_rule('/api/methods/get_counter', methods=['GET'], view_func=api_methods.get_counter)
@@ -101,9 +99,7 @@ def modify_or_upload_files():
                        current_tasks=gi.current_tasks)
 
     elif request.form['HiddenField'] == 'RunJob':
-        reduced_file, origin_file, id = api_methods.gtirb_ddisasm("1")
-
-        # client.jfjf(id, reduced_file, origin_file)
+        api_methods.gtirb_ddisasm("1")
 
         return render_template("gtirb_upload.html",
                                current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
