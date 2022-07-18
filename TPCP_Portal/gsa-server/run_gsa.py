@@ -4,14 +4,14 @@ import sys
 # Index, Binary and Transformed Binary are passed in by the Server
 index = int(sys.argv[1])
 binary = str(sys.argv[2])
-transormedBinary = str(sys.argv[3])
+transformedBinary = str(sys.argv[3])
 
 # Runs GSA on the source & hardened binary
 def gsa_analyze():
     analysis_count = 0
     results_name = binary + "-gsa-metrics"
-    command_sub_str = "{" + "'Aggressive':'../src/{}'".format(transormedBinary) + "}" #hardened binary path
-    command_str = "python3 GSA.py --output_metrics --result_folder_name {} ../src/{} \"{}\"".format(results_name,binary,command_sub_str)
+    command_sub_str = "{" + "'Aggressive':'../src/uploads/{}/{}'".format(index,transformedBinary) + "}" #hardened binary path
+    command_str = "python3 GSA.py --output_metrics --result_folder_name {} ../src/uploads/{}/{} \"{}\"".format(results_name,index,binary,command_sub_str)
     print("")
         
     os.system(command_str)
