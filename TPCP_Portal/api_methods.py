@@ -225,7 +225,7 @@ def gtirb_run_transform_set(uploads_id: str):
     else:
         # TODO: Add contact information for developers
         message = f"Return status: {status} not explicitly handled by this server.  Please report this error to development"
-    return status, message, original_bin, transformed_bin  # TODO:, transformed_bin_type; Using Name Gen Technique
+    return status, message, original_bin, transformed_bin
 
 def pretty_print_POST(req):
     """
