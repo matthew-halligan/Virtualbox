@@ -111,15 +111,15 @@ def gtirb_ddisasm(uploads_id):
 def gen_filename(original_bin: str, transforms:str):
 
     file_extensions = {
-        "ddisasm": ".d",
-        "to-static": ".ts",
-        "reachable-reduce": ".rr",
-        "shuffle": ".sf",
-        "retpoline": ".rp",
-        "stack-stamp": ".ss",
-        "pretty-print": ".asm",
-        "binary-print": ".bp",
-        "static-binary-print": ".sbp"
+        "ddisasm": {"extension": ".d", "filetype": "gtirb"},
+        "to-static": {"extension": ".ts", "filetype": "gtirb"},
+        "reachable-reduce": {"extension": ".rr", "filetype": "gtirb"},
+        "shuffle": {"extension": ".sf", "filetype": "gtirb"},
+        "retpoline": {"extension": ".rp", "filetype": "gtirb"},
+        "stack-stamp": {"extension": ".ss", "filetype": "gtirb"},
+        "pretty-print": {"extension": ".asm", "filetype": "assembly"},
+        "binary-print": {"extension": ".bp", "filetype": "dynamic binary"},
+        "static-binary-print": {"extension": ".sbp", "filetype": "static binary"}
     }
     transform_to_int = {
         "ddisasm": 1,
@@ -146,11 +146,13 @@ def gen_filename(original_bin: str, transforms:str):
     # Convert
     extension_list = []
     for integer in int_transform_list:
-        extension_list.append(file_extensions[int_to_transform[integer]])
+        extension_list.append(file_extensions[int_to_transform[integer]]["extension"])
+        transform_bin_type = file_extensions[int_to_transform[integer]]["filetype"]
     file_extension = "".join(extension_list)
 
+
     transform_bin_name = original_bin + file_extension
-    return transform_bin_name
+    return transform_bin_name, transform_bin_type
 
 def gtirb_run_transform_set(uploads_id: str):
     """
@@ -162,9 +164,10 @@ def gtirb_run_transform_set(uploads_id: str):
         message (str): Human Readable Server Response depends on status
         original_bin (str): The filename of the original binary. Found by searching data structure
         transformed_bin (str): The filename of the transformed original binary
-        transformed_bin_type (str): 3 Potential returns; 1. binary,
-                                                         2. gtirb,
-                                                         3. asm
+        transformed_bin_type (str): 4 Potential returns; 1. dynamic binary,
+                                                         2. static binary,
+                                                         3. gtirb,
+                                                         4. asm
     """
 
 
@@ -175,7 +178,7 @@ def gtirb_run_transform_set(uploads_id: str):
     original_bin = ""
     for filename in gi.current_tasks[uploads_id].keys():
         if filename != "JobInfo":
-            lib_or_bin = gi.current_tasks[uploads_id][filename][0]
+            lib_or_bin = gi.current_tasks[uploads_id][filename]["filetype"]
             files.append((lib_or_bin, (filename, open(os.path.join(user_space, filename), "rb"))))
             if lib_or_bin == "binary":
                 original_bin = filename
@@ -188,19 +191,19 @@ def gtirb_run_transform_set(uploads_id: str):
         transformed_bin_type = ""
         return status, message, original_bin, transformed_bin, transformed_bin_type
 
-    job_transforms = gi.current_tasks[id]["JobInfo"][0]
+    job_transforms = gi.current_tasks[id]["JobInfo"]["transform"]
 
     response = re.post(url_gtirb,
                         files=files,
                         data={"transform": f"{job_transforms}"},
                         stream=True)
 
-    status = response[0].status_code
+    status = str(response[0].status_code)
     transformed_bin = ""
     # Write output of response body to the desired output location
     if str(status) == "200":
         total_byte = 0
-        transformed_bin = gen_filename(original_bin, transforms=job_transforms)
+        transformed_bin, transformed_bin_type = gen_filename(original_bin, transforms=job_transforms)
         output_location = os.path.join(os.path.join("uploads", uploads_id), response[1])
         with open(output_location, "wb") as ol:
             print("writing to output_bin...")
@@ -225,7 +228,7 @@ def gtirb_run_transform_set(uploads_id: str):
     else:
         # TODO: Add contact information for developers
         message = f"Return status: {status} not explicitly handled by this server.  Please report this error to development"
-    return status, message, original_bin, transformed_bin
+    return status, message, original_bin, transformed_bin, transformed_bin_type
 
 def pretty_print_POST(req):
     """
@@ -250,3 +253,5 @@ def pretty_print_POST(req):
 # gtirb_run_transform_set('1')
 
 print(gen_filename("ls", "ddisasm,stack-stamp,binary-print"))
+print(gen_filename("ls", "to-static,shuffle,static-binary-print"))
+print(gen_filename("ls", "ddisasm"))
