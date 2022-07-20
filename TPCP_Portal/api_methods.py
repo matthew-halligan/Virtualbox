@@ -251,7 +251,8 @@ def pretty_print_POST(req):
 
 # gi.current_tasks = {'1': {'ld-linux-x86-64.so.2': ['library', 'Not Specified', 'fine'], 'JobInfo': ['Not Specified', 'None To Report'], 'libc.so.6': ['library', 'Not Specified', 'fine'], 'libdl.so.2': ['library', 'Not Specified', 'fine'], 'libpcre2-8.so.0': ['library', 'Not Specified', 'fine'], 'libpthread.so.0': ['library', 'Not Specified', 'fine'], 'libselinux.so.1': ['library', 'Not Specified', 'fine'], 'ls': ['binary', 'Not Specified', 'fine']}}
 # gtirb_run_transform_set('1')
-
-print(gen_filename("ls", "ddisasm,stack-stamp,binary-print"))
-print(gen_filename("ls", "to-static,shuffle,static-binary-print"))
-print(gen_filename("ls", "ddisasm"))
+if __name__ == "__main__":
+    assert gen_filename("ls", "ddisasm,stack-stamp,binary-print") == ("ls.d.ss.bp", "dynamic binary")
+    assert gen_filename("ls", "to-static,shuffle,static-binary-print") == ("ls.ts.sf.sbp", "static binary")
+    assert gen_filename("ls", "ddisasm") == ("ls.d", "gtirb")
+    print("[gen_filename] All Test Cases Passed")
