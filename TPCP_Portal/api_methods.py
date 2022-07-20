@@ -200,6 +200,7 @@ def gtirb_run_transform_set(uploads_id: str):
 
     status = str(response[0].status_code)
     transformed_bin = ""
+    transformed_bin_type = ""
     # Write output of response body to the desired output location
     if str(status) == "200":
         total_byte = 0
