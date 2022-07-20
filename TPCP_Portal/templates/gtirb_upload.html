@@ -104,7 +104,7 @@
                                 <td><input name="ID" type="hidden" value="{{item}}">{{item}}</td>
                                 <td><input name="FileName" type="hidden"value="{{key}}"> {{key}}</td>
                                 <td>
-                                    {{current_tasks[item][key][0]}}:
+                                    {{current_tasks[item][key]["filetype"]}}:
                                     <select id="FileType" name="FileType">
                                         <option value="No Change">No Change</option>
                                         <option value="c/c++ binary">c/c++ binary</option>
@@ -116,7 +116,7 @@
                                     </select>
                                 </td>
                                 <td>
-                                    {{current_tasks[item][key][1]}}
+                                    {{current_tasks[item][key]["transform"]}}
                                     <select id="Transform" name="Transform">
                                         <option value="No Change">No Change</option>
                                         <option value="GTIRB-ddisasm">GTIRB-ddisasm</option>
@@ -147,8 +147,8 @@
                         <td id="JobID">{{item}}</td>
                         <td></td>
                         <td></td>
-                        <td id="JobTransform">{{current_tasks[item]["JobInfo"][0]}}</td>
-                        <td id="JobStatus">{{current_tasks[item]["JobInfo"][1]}}</td>
+                        <td id="JobTransform">{{current_tasks[item]["JobInfo"]["transform"]}}</td>
+                        <td id="JobStatus">{{current_tasks[item]["JobInfo"]["status"]}}</td>
 
                         <form method="post">
                             <input type="hidden" value="RunJob" name="HiddenField">
