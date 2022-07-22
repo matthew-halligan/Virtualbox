@@ -16,6 +16,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # Centralized URL Map
 app.add_url_rule('/api/methods/get_counter', methods=['GET'], view_func=api_methods.get_counter)
 app.add_url_rule('/api/methods/gtirb_ddisasm', methods=['GET'], view_func=api_methods.gtirb_ddisasm)
+app.add_url_rule('/api/methods/gtirb_ddisasm', methods=['GET'], view_func=api_methods.gtirb_run_transform_set)
 
 # Check that the upload folder exists
 if not os.path.isdir(UPLOAD_FOLDER):
@@ -52,17 +53,18 @@ def modify_or_upload_files():
         filename = request.form['FileName']
         filetype = request.form['FileType'] if request.form['FileType'] != 'No Change' else get_task_map_id_file_info(id, filename, "filetype")
         transform = request.form['Transform'] if request.form['Transform'] != 'No Change' else get_task_map_id_file_info(id, filename, "transform")
-        status = request.form['Status']
+        included = True if request.form['Included'] == "True" else False
         job_status = "Must Pipe Output"
         # status = ""
         print(f"id: {id}")
         print(f"filename: {filename}")
         print(f"filetype: {filetype}")
         print(f"transform: {transform}")
-        print(f"status: {status}")
-        transform
-        add_to_task_map(id, filename, transform, filetype, status)
+        print(f"included: {included}")
+
+        add_to_task_map(id, filename, transform, filetype, included)
         update_job_info(id, transform, job_status)
+        print(f"[INFO] Task Map: {gi.current_tasks}", flush=True)
         return render_template("gtirb_upload.html",
                                current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
                                current_tasks=gi.current_tasks)
@@ -94,22 +96,25 @@ def modify_or_upload_files():
                 print(filename)
                 file.save(os.path.join(upload_space, filename))
                 transform = "Not Specified"
-                filetype, status = "Not Specified", 'fine'
-                add_to_task_map(id, filename, transform, filetype, status)
+                filetype, included = "Not Specified", False
+                # TODO: Define Logic to Make JobInfo Included List
+                add_to_task_map(id, filename, transform, filetype, included)
         return render_template("gtirb_upload.html", id=id,
                        current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
                        current_tasks=gi.current_tasks)
 
     elif request.form['HiddenField'] == 'RunJob':
-        print("runjob")
+        print("runjob", flush=True)
         status, message, original_bin, transformed_bin, transformed_bin_type = api_methods.gtirb_run_transform_set("1")
-        update_job_info("1", gi.current_tasks["1"]["JobInfo"]["transform"])
+        update_job_info("1", transform=gi.current_tasks["1"]["JobInfo"]["transform"], status=gi.current_tasks["1"]["JobInfo"]["status"])
+        print(f"current tasks {gi.current_tasks}", flush=True)
         if status != "200":
 
             return render_template("gtirb_upload.html",
                                    current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
                                    current_tasks=gi.current_tasks)
         # Status == "200" and can assume this is true
+        add_to_task_map("1", transformed_bin, "Not Specified", transformed_bin_type, included=False)
         if transformed_bin_type == "dynamic binary" or transformed_bin_type == "static binary":
             client.send_data_to_GSA_server("1", original_bin, transformed_bin)
 
@@ -134,22 +139,24 @@ def update_job_info(id, job_transform, job_status):
         print(e)
 
 
-def add_to_task_map(id, filename, transform, filetype, status):
+def add_to_task_map(id, filename, transform, filetype, included):
     # Task Map Structure is as follows
     # { id:{filename: [filetype, transform, status], "JobInfo": [transform, status]}, ...,
     #   id+n:{filename: [filetype, transform, status], "JobInfo": [transform, status]} }
     try:
-        gi.current_tasks[id][filename] = {"filetype": filetype, "transform": transform, "status": status}
+        gi.current_tasks[id][filename] = {"filetype": filetype, "transform": transform, "included": included}
 
     except KeyError:
-        gi.current_tasks[id] = {filename: {"filetype": filetype, "transform": transform, "status": status},
+        gi.current_tasks[id] = {filename: {"filetype": filetype, "transform": transform, "included": included},
                                 "JobInfo": {"transform": transform, "status": "None To Report"}}
 
-def update_job_info(id, transform="", status=""):
+def update_job_info(id, transform="", status="", included=""):
     # Update transform
     if transform != "":
         gi.current_tasks[id]["JobInfo"]["transform"] = transform
 
+    if included != "":
+        gi.current_tasks[id]["JobInfo"]["included"] = included
     # Update Status
     if status == "":
         return
