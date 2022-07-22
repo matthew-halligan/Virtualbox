@@ -15,8 +15,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Centralized URL Map
 app.add_url_rule('/api/methods/get_counter', methods=['GET'], view_func=api_methods.get_counter)
-app.add_url_rule('/api/methods/gtirb_ddisasm', methods=['GET'], view_func=api_methods.gtirb_ddisasm)
-app.add_url_rule('/api/methods/gtirb_ddisasm', methods=['GET'], view_func=api_methods.gtirb_run_transform_set)
+app.add_url_rule('/api/methods/gtirb_run_transform', methods=['GET'], view_func=api_methods.gtirb_run_transform_set)
 
 # Check that the upload folder exists
 if not os.path.isdir(UPLOAD_FOLDER):
