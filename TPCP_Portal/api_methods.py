@@ -14,99 +14,6 @@ def get_counter():
     #   id+n:{filename: [filetype, transform, status]} }
 
 
-def gtirb_ddisasm(uploads_id):
-    """
-    Highly specific to 'ls' test case
-    uploads_id:
-
-    """
-    gtirb_url = f'http://{gi.IP_HOST_GTIRB}/simple'.encode("utf8").strip()
-
-    user_space = os.path.join('uploads', str(uploads_id))
-    files = [("binary", ("ls", open("/bin/ls", "rb")))  # ,
-             # ("library", ("libpthread.so.0", open("/lib/x86_64-linux-gnu/libpthread.so.0", "rb"))),
-             # ("library", ("libc.so.6", open("/lib/x86_64-linux-gnu/libc.so.6", "rb"))),
-             # ("library", ("ld-linux-x86-64.so.2", open("/lib64/ld-linux-x86-64.so.2", "rb"))),
-             # ("library", ("libselinux.so.1", open("/lib/x86_64-linux-gnu/libselinux.so.1", "rb"))),
-             # ("library", ("libpcre2-8.so.0", open("/lib/x86_64-linux-gnu/libpcre2-8.so.0", "rb"))),
-             # ("library", ("libdl.so.2", open("/lib/x86_64-linux-gnu/libdl.so.2", "rb")))
-             ]
-
-    files_ts = [("binary", ("ls", open("/bin/ls", "rb"))),
-                ("library", ("libpthread.so.0", open("/lib/x86_64-linux-gnu/libpthread.so.0", "rb"))),
-                ("library", ("libc.so.6", open("/lib/x86_64-linux-gnu/libc.so.6", "rb"))),
-                ("library", ("ld-linux-x86-64.so.2", open("/lib64/ld-linux-x86-64.so.2", "rb"))),
-                ("library", ("libselinux.so.1", open("/lib/x86_64-linux-gnu/libselinux.so.1", "rb"))),
-                ("library", ("libpcre2-8.so.0", open("/lib/x86_64-linux-gnu/libpcre2-8.so.0", "rb"))),
-                ("library", ("libdl.so.2", open("/lib/x86_64-linux-gnu/libdl.so.2", "rb")))
-                ]
-
-    # index_files = 0
-    # for filename in gi.current_tasks[uploads_id].keys():
-    #     if filename != "JobInfo":
-    #         # print(filename)
-    #         files[index_files] = open(os.path.join(user_space, filename), 'rb')
-    #         index_files += 1
-    # file = {filename: open(os.path.join(user_space, filename), 'rb')}
-    # print(file)
-
-    # stack-stamp
-    ss_response = re.post(gtirb_url,
-                          files=files,
-                          data={"transform": "ddisasm,stack-stamp,binary-print"},
-                          stream=True)
-
-    # to-static
-    # t_response = re.post(gtirb_url,
-    #                      files=files_ts,
-    #                      data={"transform": "to-static,pretty-print"},
-    #                      stream=True)
-
-    # to-static, stack-stamp
-    tss_response = re.post(gtirb_url,
-                           files=files_ts,
-                           data={"transform": "to-static,stack-stamp,static-binary-print"},
-                           stream=True)
-
-    # to-static, shuffle
-    # s_response = re.post(gtirb_url,
-    #                      files=files_ts,
-    #                      data={"transform": "to-static,shuffle,static-binary-print"},
-    #                      stream=True)
-    responses = [
-        [ss_response, "stack-stamp.ls"],
-        # [t_response, "to-static.ls"],
-        [tss_response, "t-stack-stamp.ls"],
-        # [s_response, "shuffle.ls"]
-    ]
-    for response in responses:
-        status = response[0].status_code
-
-        # Write output of response body to the desired output location
-        if str(status) == "200":
-            total_byte = 0
-            output_location = os.path.join(os.path.join("uploads", uploads_id), response[1])
-            with open(output_location, "wb") as ol:
-                print("writing to output_bin...")
-                for chunk in response[0].iter_content(chunk_size=1024):
-                    if chunk:
-                        total_byte += 1024
-                        print(total_byte)
-                        ol.write(chunk)
-                print("finished writing to output_bin")
-        elif str(status) == "400":
-            try:
-                raise SyntaxError
-            except SyntaxError:
-                print("Error encountered by server.  Syntax given was invalid")
-        elif str(status) == "500":
-            try:
-                raise SystemError
-            except SystemError:
-                print("Error encountered by server.\nError information stored in 'ErrorLog.txt'")
-                with open("ErrorLog.txt", "w") as EL:
-                    EL.write(response[0].text)
-
 
 def gen_filename(original_bin: str, transforms:str):
 
@@ -170,45 +77,54 @@ def gtirb_run_transform_set(uploads_id: str):
                                                          4. asm
     """
 
-
-    url_gtirb = f"https://{gi.IP_HOST_GTIRB}/simple"
+    print("running")
+    url_gtirb = f"http://{gi.IP_HOST_GTIRB}:{gi.PORT_HOST_GTIRB}/simple"
+    # url_gtirb = "http://172.17.0.2/simple"
     user_space = os.path.join('uploads', str(uploads_id))
     files = []
     # print(gi.current_tasks)
     original_bin = ""
+
     for filename in gi.current_tasks[uploads_id].keys():
+
         if filename != "JobInfo":
-            lib_or_bin = gi.current_tasks[uploads_id][filename]["filetype"]
-            files.append((lib_or_bin, (filename, open(os.path.join(user_space, filename), "rb"))))
-            if lib_or_bin == "binary":
-                original_bin = filename
+            included = gi.current_tasks[uploads_id][filename]["included"]
+            if included:
+                lib_or_bin = gi.current_tasks[uploads_id][filename]["filetype"]
+                files.append((lib_or_bin, (filename.split("/")[-1], open(os.path.join(user_space, filename), "rb"))))
+                if lib_or_bin == "binary":
+                    original_bin = filename
 
     if original_bin == "":
+
         status = "400"
         message = "[ERROR] Binary file not detected in upload.  Please check that you have selected uploaded and " \
                   "labeled your binary file for transformation "
         transformed_bin = ""
         transformed_bin_type = ""
+        print(message)
         return status, message, original_bin, transformed_bin, transformed_bin_type
 
-    job_transforms = gi.current_tasks[id]["JobInfo"]["transform"]
-
+    job_transforms = gi.current_tasks[uploads_id]["JobInfo"]["transform"]
+    print(f"[INFO] files {files}")
+    print(f"[INFO] transformations {job_transforms}")
     response = re.post(url_gtirb,
                         files=files,
                         data={"transform": f"{job_transforms}"},
                         stream=True)
 
-    status = str(response[0].status_code)
+    status = str(response.status_code)
     transformed_bin = ""
     transformed_bin_type = ""
+    print(status)
     # Write output of response body to the desired output location
     if str(status) == "200":
         total_byte = 0
         transformed_bin, transformed_bin_type = gen_filename(original_bin, transforms=job_transforms)
-        output_location = os.path.join(os.path.join("uploads", uploads_id), response[1])
+        output_location = os.path.join(os.path.join("uploads", uploads_id), transformed_bin)
         with open(output_location, "wb") as ol:
             print("writing to output_bin...")
-            for chunk in response[0].iter_content(chunk_size=1024):
+            for chunk in response.iter_content(chunk_size=1024):
                 if chunk:
                     total_byte += 1024
                     print(total_byte)
@@ -218,7 +134,8 @@ def gtirb_run_transform_set(uploads_id: str):
         try:
             raise SyntaxError
         except SyntaxError:
-            message = "Error encountered by server.  Syntax given was invalid"
+            message = "[Error] Error encountered by server.  Syntax given was invalid"
+            print(message)
     elif str(status) == "500":
         try:
             raise SystemError
@@ -257,3 +174,6 @@ if __name__ == "__main__":
     assert gen_filename("ls", "to-static,shuffle,static-binary-print") == ("ls.ts.sf.sbp", "static binary")
     assert gen_filename("ls", "ddisasm") == ("ls.d", "gtirb")
     print("[gen_filename] All Test Cases Passed")
+    gi.current_tasks = {'1': {'ls': {'filetype': 'c/c++ binary', 'transform': 'GTIRB-ddisasm', 'status': ''}, 'JobInfo': {'transform': 'GTIRB-ddisasm', 'status': 'None To ReportMust Pipe OutputNone To ReportMust Pipe Output'}}}
+
+    gtirb_run_transform_set("1")
