@@ -1,11 +1,13 @@
 import socket
 import sys
+import global_items as gi
 
-HOST = "172.20.0.8"  # The gsa container's hostname or IP address
-PORT = 6000  # The port used by the server GSA container
+HOST = gi.IP_HOST_GSA  # The gsa container's hostname or IP address
+PORT = gi.PORT_HOST_GSA  # The port used by the server GSA container
 BUFFER_SIZE = 1024 #Figure out limit later. Smaller buffer = faster writes
 
-def send_data_to_GSA_server(index,sourceBinaryName,transformBinaryName):
+# TODO: Call this function from app.upload_file() after upload/download completion
+def send_data_to_GSA_server(index, sourceBinaryName, transformBinaryName):
     data_encoded = str(index + "," + sourceBinaryName + ',' + transformBinaryName).encode()
     print(data_encoded)
 

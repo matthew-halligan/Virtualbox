@@ -1,2 +1,2 @@
 #!/bin/bash
-rm -rf /tmp/uploads/*
+rm -rf ~/Desktop/Virtualbox/TPCP_Portal/uploads/
