@@ -110,7 +110,9 @@ def modify_or_upload_files():
         status, message, original_bin, transformed_bin, transformed_bin_type = api_methods.gtirb_run_transform_set(id)
         update_job_info(id, transform=gi.current_tasks[id]["JobInfo"]["transform"], status=gi.current_tasks[id]["JobInfo"]["status"])
         if status != "200":
-
+            path = os.path.join(app.config["UPLOAD_FOLDER"], id)
+            if os.path.exists(os.path.join(path, "ErrorLog.txt")):
+                add_to_task_map(id, "ErrorLog.txt", "Log (Do Not Include)", False)
             return render_template("gtirb_upload.html",
                                    current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
                                    current_tasks=gi.current_tasks)
@@ -118,7 +120,9 @@ def modify_or_upload_files():
         add_to_task_map(id, transformed_bin, transformed_bin_type, included=False)
         if transformed_bin_type == "dynamic binary" or transformed_bin_type == "static binary":
             client.send_data_to_GSA_server(id, original_bin, transformed_bin)
-
+            metrics_dir = f"{transformed_bin}-gsa-metrics"
+            add_to_task_map(id, metrics_dir, "directory (do not include)", False)
+            # TODO: Modify client to collect the name of the stats output dir and add to task map
         return render_template("gtirb_upload.html",
                                current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
                                current_tasks=gi.current_tasks)
