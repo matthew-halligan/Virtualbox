@@ -147,7 +147,7 @@
                     {% endfor %}
                     <thead><tr>
                         <th>Job ID</th>
-                        <th></th>
+                        <th>File(s) Included</th>
                         <th></th>
                         <th>Transform(s) Running</th>
                         <th>Status</th>
@@ -155,7 +155,12 @@
                     </tr></thead>
                     <tr>
                         <td id="JobID">{{item}}</td>
-                        <td></td>
+                        <td id="JobIncluded">
+                            {% for task in current_tasks[item]["JobInfo"]["included"]%}
+                                <p>{{task}}</p><br>
+                            {% endfor %}
+                        </td>
+
                         <td></td>
                         <td id="JobTransform">{{current_tasks[item]["JobInfo"]["transform"]}}</td>
                         <td id="JobStatus">{{current_tasks[item]["JobInfo"]["status"]}}</td>
