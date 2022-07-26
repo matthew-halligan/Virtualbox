@@ -91,7 +91,7 @@
                     <th>IDs</th>
                     <th>Filename</th>
                     <th>File type</th>
-                    <th>Transform To Run</th>
+                    <th></th>
                     <th>Included</th>
                     <th>Update</th>
                   </tr></thead>
@@ -113,21 +113,8 @@
                                     </select>
                                 </td>
                                 <td>
-                                    {{current_tasks[item][key]["transform"]}}
-                                    <select id="Transform" name="Transform">
-                                        <option value="No Change">No Change</option>
+<!--                                    TODO: Find a valuable use of this space-->
 
-                                        <option value="ddisasm,devirt,binary-print">ddisasm -> devirt -> binary-print</option>
-                                        <option value="ddisasm,shuffle,binary-print">ddisasm -> shuffle -> binary-print</option>
-                                        <option value="ddisasm,stack-stamp,binary-print">ddisasm -> stackstamp -> binaryprint</option>
-                                        <option value="ddisasm,retpoline,binary-print">ddisasm -> retpoline -> binary-print</option>
-
-                                        <option value="to-static,devirt,static-binary-print">to-static -> devirt -> static-binary-print</option>
-                                        <option value="to-static,shuffle,static-binary-print">to-static -> shuffle -> static-binary-print</option>
-                                        <option value="to-static,stack-stamp,static-binary-print">to-static -> stack-stamp -> static-binary-print</option>
-                                        <option value="to-static,retpoline,static-binary-print">to-static -> retpoline -> static-binary-print</option>
-
-                                    </select>
                                 </td>
                                 <td id="Included-TD">
                                     <input name="Included" id="Included-True" type="radio" value="True"
@@ -148,26 +135,46 @@
                     <thead><tr>
                         <th>Job ID</th>
                         <th>File(s) Included</th>
-                        <th></th>
-                        <th>Transform(s) Running</th>
+                        <th>Transforms to Run</th>
                         <th>Status</th>
+                        <th></th>
                         <th></th>
                     </tr></thead>
                     <tr>
-                        <td id="JobID">{{item}}</td>
-                        <td id="JobIncluded">
-                            {% for task in current_tasks[item]["JobInfo"]["included"]%}
-                                <p>{{task}}</p><br>
-                            {% endfor %}
-                        </td>
-
-                        <td></td>
-                        <td id="JobTransform">{{current_tasks[item]["JobInfo"]["transform"]}}</td>
-                        <td id="JobStatus">{{current_tasks[item]["JobInfo"]["status"]}}</td>
-
-                        <form method="post">
+                       <form method="post">
                             <input type="hidden" value="RunJob" name="HiddenField">
-                            <td><input type="submit" value="Submit Job" id="{{item}}"></td>
+                            <td id="TD-JobID"><input name="JobID" type="hidden" value="{{item}}">{{item}}</td>
+                            <td id="TD-JobIncluded">
+                                {% for task in current_tasks[item]["JobInfo"]["included"]%}
+                                    <p>{{task}}</p><br>
+                                {% endfor %}
+                            </td>
+
+
+                            <td id="TD-JobTransform">
+                                <select id="JobTransform" name="JobTransform">
+                                    <option value="Must Select">Must Select</option>
+
+                                    <option value="ddisasm,devirt,binary-print">ddisasm -> devirt -> binary-print</option>
+                                    <option value="ddisasm,shuffle,binary-print">ddisasm -> shuffle -> binary-print</option>
+                                    <option value="ddisasm,stack-stamp,binary-print">ddisasm -> stackstamp -> binaryprint</option>
+                                    <option value="ddisasm,retpoline,binary-print">ddisasm -> retpoline -> binary-print</option>
+
+                                    <option value="to-static,devirt,static-binary-print">to-static -> devirt -> static-binary-print</option>
+                                    <option value="to-static,shuffle,static-binary-print">to-static -> shuffle -> static-binary-print</option>
+                                    <option value="to-static,stack-stamp,static-binary-print">to-static -> stack-stamp -> static-binary-print</option>
+                                    <option value="to-static,retpoline,static-binary-print">to-static -> retpoline -> static-binary-print</option>
+
+                                        </select>
+                            </td>
+                            <td id="TD-JobStatus">{{current_tasks[item]["JobInfo"]["status"]}}</td>
+
+                            <td><input type="submit" value="Submit Job" id="s-{{item}}"></td>
+                       </form>
+                        <form method="post">
+                            <input type="hidden" value="DownloadJob" name="HiddenField">
+                            <input type="hidden" name="JobID" value="{{item}}">
+                            <td><input type="submit" value="Download Job" id="d-{{item}}"></td>
                         </form>
                     </tr>
 
