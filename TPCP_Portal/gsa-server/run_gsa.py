@@ -9,7 +9,7 @@ transformedBinary = str(sys.argv[3])
 # Runs GSA on the source & hardened binary
 def gsa_analyze():
     analysis_count = 0
-    results_name = binary + "-gsa-metrics"
+    results_name = transformedBinary + "-gsa-metrics"
     command_sub_str = "{" + "'Aggressive':'../src/uploads/{}/{}'".format(index,transformedBinary) + "}" #hardened binary path
     command_str = "python3 GSA.py --output_metrics --result_folder_name {} ../src/uploads/{}/{} \"{}\"".format(results_name,index,binary,command_sub_str)
     print("")
@@ -17,7 +17,7 @@ def gsa_analyze():
     os.system(command_str)
     analysis_count += 1
 
-    # After metric results are generated, move from from their folder into /uploads/<job index>
+    # After metric results are generated, move from their folder into /uploads/<job index>
     while analysis_count != 0:
         os.system(f"mv ../src/results/{results_name} ../src/uploads/{index}")
         analysis_count -= 1
