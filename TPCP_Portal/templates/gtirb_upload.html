@@ -108,9 +108,6 @@
                                     <select id="FileType" name="FileType">
                                         <option value="No Change">No Change</option>
                                         <option value="binary">c/c++ binary</option>
-                                        <option value="Java Archive">Java Archive</option>
-                                        <option value="chisel yaml">chisel yaml</option>
-                                        <option value="c/c++ source">c/c++ source</option>
                                         <option value="library">library</option>
                                         <option value="gtirb">gtirb</option>
                                     </select>
@@ -119,18 +116,27 @@
                                     {{current_tasks[item][key]["transform"]}}
                                     <select id="Transform" name="Transform">
                                         <option value="No Change">No Change</option>
-                                        <option value="ddisasm">GTIRB-ddisasm</option>
-                                        <option value="to-static">GTIRB-to-static</option>
-                                        <option value="stack-stamp">GTIRB-stack-stamp</option>
-                                        <option value="static-binary-print">GTIRB-static-binary-print</option>
-                                        <option value="binary-print">GTIRB-binary-print</option>
+
+                                        <option value="ddisasm,devirt,binary-print">ddisasm -> devirt -> binary-print</option>
+                                        <option value="ddisasm,shuffle,binary-print">ddisasm -> shuffle -> binary-print</option>
                                         <option value="ddisasm,stack-stamp,binary-print">ddisasm -> stackstamp -> binaryprint</option>
+                                        <option value="ddisasm,retpoline,binary-print">ddisasm -> retpoline -> binary-print</option>
+
+                                        <option value="to-static,devirt,static-binary-print">to-static -> devirt -> static-binary-print</option>
+                                        <option value="to-static,shuffle,static-binary-print">to-static -> shuffle -> static-binary-print</option>
+                                        <option value="to-static,stack-stamp,static-binary-print">to-static -> stack-stamp -> static-binary-print</option>
+                                        <option value="to-static,retpoline,static-binary-print">to-static -> retpoline -> static-binary-print</option>
+
                                     </select>
                                 </td>
                                 <td id="Included-TD">
-                                    <input name="Included" id="Included-True" type="radio" value="True"> Yes, Include
+                                    <input name="Included" id="Included-True" type="radio" value="True"
+                                           {% if current_tasks[item][key]['included'] == True%} checked {% endif %}
+                                    > Yes, Include
                                     </br>
-                                    <input name="Included" id="Included-False" type="radio" value="False"> No, Do Not Include
+                                    <input name="Included" id="Included-False" type="radio" value="False"
+                                    {% if current_tasks[item][key]['included'] == False%} checked {% endif %}
+                                    > No, Do Not Include
                                 </td>
 
             <!--                      <td><input name="Status" type="hidden" value="{{current_tasks[item][key][2]}}">{{current_tasks[item][key][2]}}</td>-->
