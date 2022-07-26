@@ -39,10 +39,10 @@ def upload():
 @app.route('/upload_gtirb', methods=['POST', 'GET'])
 def modify_or_upload_files():
     global current_tasks
-    print(gi.current_tasks)
+    # print(gi.current_tasks)
     counter = 0
     if request.method != 'POST':
-        print("In not post")
+        # print("In not post")
         return render_template("gtirb_upload.html",
                                current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
                                current_tasks=gi.current_tasks)
@@ -55,14 +55,15 @@ def modify_or_upload_files():
         included = True if request.form['Included'] == "True" else False
         job_status = "Must Pipe Output"
         # status = ""
-        print(f"id: {id}")
-        print(f"filename: {filename}")
-        print(f"filetype: {filetype}")
-        print(f"transform: {transform}")
-        print(f"included: {included}")
+        # print(f"id: {id}")
+        # print(f"filename: {filename}")
+        # print(f"filetype: {filetype}")
+        # print(f"transform: {transform}")
+        # print(f"included: {included}")
 
         add_to_task_map(id, filename, transform, filetype, included)
         update_job_info(id, transform, job_status)
+        modify_job_included(id, filename, included)
         print(f"[INFO] Task Map: {gi.current_tasks}", flush=True)
         return render_template("gtirb_upload.html",
                                current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
@@ -92,7 +93,6 @@ def modify_or_upload_files():
         for file in files:
             if file:
                 filename = secure_filename(file.filename)
-                print(filename)
                 file.save(os.path.join(upload_space, filename))
                 transform = "Not Specified"
                 filetype, included = "Not Specified", False
@@ -103,10 +103,8 @@ def modify_or_upload_files():
                        current_tasks=gi.current_tasks)
 
     elif request.form['HiddenField'] == 'RunJob':
-        print("runjob", flush=True)
         status, message, original_bin, transformed_bin, transformed_bin_type = api_methods.gtirb_run_transform_set("1")
         update_job_info("1", transform=gi.current_tasks["1"]["JobInfo"]["transform"], status=gi.current_tasks["1"]["JobInfo"]["status"])
-        print(f"current tasks {gi.current_tasks}", flush=True)
         if status != "200":
 
             return render_template("gtirb_upload.html",
@@ -147,15 +145,15 @@ def add_to_task_map(id, filename, transform, filetype, included):
 
     except KeyError:
         gi.current_tasks[id] = {filename: {"filetype": filetype, "transform": transform, "included": included},
-                                "JobInfo": {"transform": transform, "status": "None To Report"}}
+                                "JobInfo": {"transform": transform, "status": "None To Report", "included": []}} #TODO: Verify this "included' belongs in the list declaration
 
 def update_job_info(id, transform="", status="", included=""):
     # Update transform
     if transform != "":
         gi.current_tasks[id]["JobInfo"]["transform"] = transform
 
-    if included != "":
-        gi.current_tasks[id]["JobInfo"]["included"] = included
+    # if included != "":
+    #     gi.current_tasks[id]["JobInfo"]["included"] = included
     # Update Status
     if status == "":
         return
@@ -164,6 +162,23 @@ def update_job_info(id, transform="", status="", included=""):
     else:
         gi.current_tasks[id]["JobInfo"]["status"] += status
 
+def modify_job_included(id, filename, included):
+    """
+        id (string): id of job to modify
+        filename (string): filename that will be added or removed from
+                           the included list
+        included (bool): the logic control that will enable the addition
+                         or removal of filename
+    """
+
+    for gi_filename in gi.current_tasks[id]["JobInfo"]["included"]:
+        if included and gi_filename == filename:
+            #Item already in the included list
+            return
+        if not included and gi_filename == filename:
+            gi.current_tasks[id]["JobInfo"]["included"].remove(gi_filename)
+            return
+    gi.current_tasks[id]["JobInfo"]["included"].append(filename)
 
 def get_task_map_id(id):
     return gi.current_tasks[id]
