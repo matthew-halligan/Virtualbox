@@ -127,7 +127,6 @@ def gtirb_run_transform_set(uploads_id: str):
             for chunk in response.iter_content(chunk_size=1024):
                 if chunk:
                     total_byte += 1024
-                    print(total_byte)
                     ol.write(chunk)
             message = "finished writing to output_bin"
     elif str(status) == "400":
@@ -141,8 +140,8 @@ def gtirb_run_transform_set(uploads_id: str):
             raise SystemError
         except SystemError:
             message = "Error encountered by server.\nError information stored in 'ErrorLog.txt'"
-            with open("ErrorLog.txt", "w") as EL:
-                EL.write(response[0].text)
+            with open(os.path.join(os.path.join("uploads", uploads_id), "ErrorLog.txt"), "w") as EL:
+                EL.write(response.text)
     else:
         # TODO: Add contact information for developers
         message = f"Return status: {status} not explicitly handled by this server.  Please report this error to development"
