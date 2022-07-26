@@ -17,6 +17,9 @@
     background-color: white;
     font-family: 'Scope One', serif;
   }
+  body section{
+    padding: 1em 2em 1em 2em;
+  }
 
   span {
     font-size: 9
@@ -53,117 +56,213 @@
     color: white;
   }
 
+  .block {
+    display: inline-block;
+    margin: 20px 2% 20px 2%;
+  }
+
+  .border {
+    border-style: solid;
+    border-width: 3px;
+    border-radius: 1em;
+  }
+
+  .light-grey-background{
+    background: rgb(192, 192, 192)
+  }
+
+  .half-width {
+    max-width: 50%;
+  }
+
+  .pt-20{
+    padding-top: 20px;
+  }
+
+  .ptb-20 {
+    padding: 20px 0 20px 0;
+  }
+
+  .pb-20 {
+    padding-bottom: 20px;
+  }
+
+  .pl-20{
+    padding-left: 20px;
+  }
+
+  .pl-40{
+    padding-left: 40px;
+  }
+
+  .margin-left-20{
+    margin-left: 20px;
+  }
+
+  .margin-left-40{
+    margin-left: 40px;
+  }
+
+  .margin-top-20{
+    margin-top: 20px;
+  }
+  .margin-top-40{
+    margin-top: 40px;
+  }
+
+
 </style>
 </head>
 <body>
+    {% set active_page = 'Chisel' %}
     {% include 'nav.html' %}
-    <h3>Chisel Transformation Tool</h3>
-    <p id="counter">counter: {{counter}}</p>
-    <h4>Select All of the Files You Wish to Upload and Press Submit</h4>
-    <form class="my-form" enctype="multipart/form-data" method="post">
-        <input type="hidden" value="UploadFile" name="HiddenField">
-        <input type="file"  multiple accept="file_extension", name="files[]">
+    <section>
+        <h3 class="ptb-20">Chisel Transforms</h3>
+<!--        <p id="counter">counter: {{counter}}</p>-->
+        <h4 class="pb-20 margin-left-20">Upload</h4>
+        <section class="border light-grey-background half-width margin-left-40">
+            <p>1. Select all of your files</p>
+            <p>2. If you want to add more files to a previous job select the id in the dropdown menu</p>
+            <p>3. Select 'Upload Files'</p>
+            <form class="my-form" enctype="multipart/form-data" method="post">
+            <input type="hidden" value="UploadFile" name="HiddenField">
+            <div class="block">
+                <input type="file"  multiple accept="file_extension", name="files[]">
+            </div>
 
-        <br><br>
-        <p>Adding to a previous job or new job?</p>
-         <label for="ID">Choose an ID:</label>
-         <select id="ID" name="JobID">
-             <option value="New Job">New Job</option>
-             {% if current_series_ids|length > 0 %}
-                {% for item in current_series_ids %}
-                    <option value={{item}}>ID: {{item}}</option>
-                {% endfor %}
-             {% endif %}
-         </select>
-        <br><br>
-        <input type="submit" id="upload_files">
-    </form>
-    <progress id="progress-bar" max="100" value="10"></progress>
-
-    {% if id %}
-    <p>The Id of your task is: {{id}}</p>
-    {% endif %}
-
-    {% if current_series_ids|length > 0 %}
-        {% for item in current_series_ids %}
-            <table class="queue">
-                <thead><tr>
-                    <th>IDs</th>
-                    <th>Filename</th>
-                    <th>File type</th>
-                    <th>Transform To Run</th>
-                    <th>Status</th>
-                    <th>Update</th>
-                  </tr></thead>
-                <tbody>
-                    {% for key in current_tasks[item].keys() %}
-                    {% if key != "JobInfo" %}
-                        <form method="post" onsubmit="upload_table()">
-                            <input type="hidden" value="ModifyFile" name="HiddenField">
-                            <tr>
-                                <td><input name="ID" type="hidden" value="{{item}}">{{item}}</td>
-                                <td><input name="FileName" type="hidden"value="{{key}}"> {{key}}</td>
-                                <td>
-                                    {{current_tasks[item][key][0]}}:
-                                    <select id="FileType" name="FileType">
-                                        <option value="No Change">No Change</option>
-                                        <option value="c/c++ binary">c/c++ binary</option>
-                                        <option value="Java Archive">Java Archive</option>
-                                        <option value="chisel yaml">chisel yaml</option>
-                                        <option value="c/c++ source">c/c++ source</option>
-                                        <option value="library">library</option>
-                                        <option value="gtirb">gtirb</option>
-                                    </select>
-                                </td>
-                                <td>
-                                    {{current_tasks[item][key][1]}}
-                                    <select id="Transform" name="Transform">
-                                        <option value="No Change">No Change</option>
-                                        <option value="GTIRB-ddisasm">GTIRB-ddisasm</option>
-                                        <option value="GTIRB-to-static">GTIRB-to-static</option>
-                                        <option value="GTIRB-stack-stamp">GTIRB-stack-stamp</option>
-                                        <option value="GTIRB-static-binary-print">GTIRB-static-binary-print</option>
-                                        <option value="GTIRB-binary-print">GTIRB-binary-print</option>
-                                        <option value="gtirb">gtirb</option>
-                                    </select>
-                                </td>
-                                <td id="Status-TD"><input name="Status" id="Status" type="hidden" value="{{counter}}">{{counter}}</td>
-
-            <!--                      <td><input name="Status" type="hidden" value="{{current_tasks[item][key][2]}}">{{current_tasks[item][key][2]}}</td>-->
-                                <td><input type="submit" value='Update Entry' id="uploads_table"></td>
-                            </tr>
-                        </form>
+    <!--        <br><br>-->
+            <div class="block">
+                <p>Adding to a previous job or new job?</p>
+                <label for="ID">Choose an ID:</label>
+                <select id="ID" name="JobID">
+                    <option value="New Job">New Job</option>
+                    {% if current_series_ids|length > 0 %}
+                       {% for item in current_series_ids %}
+                           <option value={{item}}>ID: {{item}}</option>
+                       {% endfor %}
                     {% endif %}
-                    {% endfor %}
+                </select>
+            </div>
+
+    <!--        <br><br>-->
+            <div class="block">
+                <input type="submit" value="Upload Files" id="upload_files">
+            </div>
+
+        </form>
+        </section>
+
+<!--        <progress id="progress-bar" max="100" value="10"></progress>-->
+
+        {% if id %}
+        <p class="pb-20">The Id of your task is: {{id}}</p>
+        {% endif %}
+
+        {% if current_series_ids|length > 0 %}
+        <h4 class="margin-top-20">Active Jobs Table</h4>
+            {% for item in current_series_ids %}
+                <table class="queue margin-top-20">
                     <thead><tr>
-                        <th>Job ID</th>
+                        <th>IDs</th>
+                        <th>Filename</th>
+                        <th>File type</th>
                         <th></th>
-                        <th></th>
-                        <th>Transform(s) Running</th>
-                        <th>Status</th>
-                        <th></th>
-                    </tr></thead>
-                    <tr>
-                        <td id="JobID">{{item}}</td>
-                        <td></td>
-                        <td></td>
-                        <td id="JobTransform">{{current_tasks[item]["JobInfo"][0]}}</td>
-                        <td id="JobStatus">{{current_tasks[item]["JobInfo"][1]}}</td>
+                        <th>Included</th>
+                        <th>Update</th>
+                      </tr></thead>
+                    <tbody>
+                        {% for key in current_tasks[item].keys() %}
+                        {% if key != "JobInfo" %}
+                            <form method="post" onsubmit="upload_table()">
+                                <input type="hidden" value="ModifyFile" name="HiddenField">
+                                <tr>
+                                    <td><input name="ID" type="hidden" value="{{item}}">{{item}}</td>
+                                    <td><input name="FileName" type="hidden"value="{{key}}"> {{key}}</td>
+                                    <td>
+                                        {{current_tasks[item][key]["filetype"]}}:
+                                        <select id="FileType" name="FileType">
+                                            <option value="No Change">No Change</option>
+                                            <option value="c/c++ source">c/c++ source</option>
+                                            <option value="library">library</option>
+                                            <option value="oracle">oracle (test set)</option>
+                                            <option value="configuration">configuration yml</option>
+                                        </select>
+                                    </td>
+                                    <td>
+    <!--                                    TODO: Find a valuable use of this space-->
 
-                        <form method="post">
-                            <input type="hidden" value="RunJob" name="HiddenField">
-                            <td><input type="submit" value="Submit Job" id="{{item}}"></td>
-                        </form>
-                    </tr>
+                                    </td>
+                                    <td id="Included-TD">
+                                        <input name="Included" id="Included-True" type="radio" value="True"
+                                               {% if current_tasks[item][key]['included'] == True%} checked {% endif %}
+                                        > Yes, Include
+                                        </br>
+                                        <input name="Included" id="Included-False" type="radio" value="False"
+                                        {% if current_tasks[item][key]['included'] == False%} checked {% endif %}
+                                        > No, Do Not Include
+                                    </td>
 
-                  </tbody>
-            </table>
-        {% endfor %}
-    {% else %}
-        <p>No Files currently uploaded to server for transformation</p>
-    {% endif %}
+                <!--                      <td><input name="Status" type="hidden" value="{{current_tasks[item][key][2]}}">{{current_tasks[item][key][2]}}</td>-->
+                                    <td><input type="submit" value='Update Entry' id="uploads_table"></td>
+                                </tr>
+                            </form>
+                        {% endif %}
+                        {% endfor %}
+                        <thead><tr>
+                            <th>Job ID</th>
+                            <th>File(s) Included</th>
+                            <th>Transforms to Run</th>
+                            <th>Status</th>
+                            <th></th>
+                            <th></th>
+                        </tr></thead>
+                        <tr>
+                           <form method="post">
+                                <input type="hidden" value="RunJob" name="HiddenField">
+                                <td id="TD-JobID"><input name="JobID" type="hidden" value="{{item}}">{{item}}</td>
+                                <td id="TD-JobIncluded">
+                                    {% for task in current_tasks[item]["JobInfo"]["included"]%}
+                                        <p>{{task}}</p><br>
+                                    {% endfor %}
+                                </td>
 
 
+                                <td id="TD-JobTransform">
+                                    <select id="JobTransform" name="JobTransform">
+                                        <option value="Must Select">Must Select</option>
+
+                                        <option value="ddisasm,devirt,binary-print">ddisasm -> devirt -> binary-print</option>
+                                        <option value="ddisasm,shuffle,binary-print">ddisasm -> shuffle -> binary-print</option>
+                                        <option value="ddisasm,stack-stamp,binary-print">ddisasm -> stackstamp -> binaryprint</option>
+                                        <option value="ddisasm,retpoline,binary-print">ddisasm -> retpoline -> binary-print</option>
+
+                                        <option value="to-static,devirt,static-binary-print">to-static -> devirt -> static-binary-print</option>
+                                        <option value="to-static,shuffle,static-binary-print">to-static -> shuffle -> static-binary-print</option>
+                                        <option value="to-static,stack-stamp,static-binary-print">to-static -> stack-stamp -> static-binary-print</option>
+                                        <option value="to-static,retpoline,static-binary-print">to-static -> retpoline -> static-binary-print</option>
+
+                                            </select>
+                                </td>
+                                <td id="TD-JobStatus">{{current_tasks[item]["JobInfo"]["status"]}}</td>
+
+                                <td><input type="submit" value="Submit Job" id="s-{{item}}"></td>
+                           </form>
+                            <form method="post">
+                                <input type="hidden" value="DownloadJob" name="HiddenField">
+                                <input type="hidden" name="JobID" value="{{item}}">
+                                <td><input type="submit" value="Download Job" id="d-{{item}}"></td>
+                            </form>
+                        </tr>
+
+                      </tbody>
+                </table>
+            {% endfor %}
+        {% else %}
+            <p class="pt-20">No Files currently uploaded to server for transformation</p>
+        {% endif %}
+
+    </section>
+</body>
 <!--<script type="text/javascript">-->
 <!--    console.log('Executing on load');-->
 <!--    setIntervalH(UpdateCounter, 'Status', 500, '/api/methods/get_counter');-->

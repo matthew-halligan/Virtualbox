@@ -1,11 +1,11 @@
-import sys, os
+import sys, os, shutil
 import global_items as gi
 
 
 import api_methods
 import client
 
-from flask import Flask, render_template, flash, request, redirect
+from flask import Flask, render_template, flash, request, redirect, send_from_directory
 from werkzeug.utils import secure_filename
 
 
@@ -39,10 +39,10 @@ def upload():
 @app.route('/upload_gtirb', methods=['POST', 'GET'])
 def modify_or_upload_files():
     global current_tasks
-    print(gi.current_tasks)
+    # print(gi.current_tasks)
     counter = 0
     if request.method != 'POST':
-        print("In not post")
+        # print("In not post")
         return render_template("gtirb_upload.html",
                                current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
                                current_tasks=gi.current_tasks)
@@ -51,18 +51,18 @@ def modify_or_upload_files():
         id = request.form['ID']
         filename = request.form['FileName']
         filetype = request.form['FileType'] if request.form['FileType'] != 'No Change' else get_task_map_id_file_info(id, filename, "filetype")
-        transform = request.form['Transform'] if request.form['Transform'] != 'No Change' else get_task_map_id_file_info(id, filename, "transform")
         included = True if request.form['Included'] == "True" else False
-        job_status = "Must Pipe Output"
-        # status = ""
-        print(f"id: {id}")
-        print(f"filename: {filename}")
-        print(f"filetype: {filetype}")
-        print(f"transform: {transform}")
-        print(f"included: {included}")
 
-        add_to_task_map(id, filename, transform, filetype, included)
-        update_job_info(id, transform, job_status)
+        # status = ""
+        # print(f"id: {id}")
+        # print(f"filename: {filename}")
+        # print(f"filetype: {filetype}")
+        # print(f"transform: {transform}")
+        # print(f"included: {included}")
+
+        add_to_task_map(id, filename, filetype, included)
+
+        modify_job_included(id, filename, included)
         print(f"[INFO] Task Map: {gi.current_tasks}", flush=True)
         return render_template("gtirb_upload.html",
                                current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
@@ -92,40 +92,140 @@ def modify_or_upload_files():
         for file in files:
             if file:
                 filename = secure_filename(file.filename)
-                print(filename)
                 file.save(os.path.join(upload_space, filename))
                 transform = "Not Specified"
                 filetype, included = "Not Specified", False
                 # TODO: Define Logic to Make JobInfo Included List
-                add_to_task_map(id, filename, transform, filetype, included)
+                add_to_task_map(id, filename, filetype, included)
         return render_template("gtirb_upload.html", id=id,
                        current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
                        current_tasks=gi.current_tasks)
 
     elif request.form['HiddenField'] == 'RunJob':
-        print("runjob", flush=True)
-        status, message, original_bin, transformed_bin, transformed_bin_type = api_methods.gtirb_run_transform_set("1")
-        update_job_info("1", transform=gi.current_tasks["1"]["JobInfo"]["transform"], status=gi.current_tasks["1"]["JobInfo"]["status"])
-        print(f"current tasks {gi.current_tasks}", flush=True)
-        if status != "200":
+        id = request.form['JobID']
+        transform = request.form['JobTransform']
+        job_status = "Must Pipe Output"
+        update_job_info(id, transform, job_status)
 
+        status, message, original_bin, transformed_bin, transformed_bin_type = api_methods.gtirb_run_transform_set(id)
+        update_job_info(id, transform=gi.current_tasks[id]["JobInfo"]["transform"], status=gi.current_tasks[id]["JobInfo"]["status"])
+        if status != "200":
+            path = os.path.join(app.config["UPLOAD_FOLDER"], id)
+            if os.path.exists(os.path.join(path, "ErrorLog.txt")):
+                add_to_task_map(id, "ErrorLog.txt", "Log (Do Not Include)", False)
             return render_template("gtirb_upload.html",
                                    current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
                                    current_tasks=gi.current_tasks)
         # Status == "200" and can assume this is true
-        add_to_task_map("1", transformed_bin, "Not Specified", transformed_bin_type, included=False)
+        add_to_task_map(id, transformed_bin, transformed_bin_type, included=False)
         if transformed_bin_type == "dynamic binary" or transformed_bin_type == "static binary":
-            client.send_data_to_GSA_server("1", original_bin, transformed_bin)
-
+            client.send_data_to_GSA_server(id, original_bin, transformed_bin)
+            metrics_dir = f"{transformed_bin}-gsa-metrics"
+            add_to_task_map(id, metrics_dir, "directory (do not include)", False)
+            # TODO: Modify client to collect the name of the stats output dir and add to task map
         return render_template("gtirb_upload.html",
                                current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
                                current_tasks=gi.current_tasks)
+    elif request.form['HiddenField'] == 'DownloadJob':
+        id = request.form['JobID']
+        filename, destination = make_archive(id)
+        return send_from_directory(directory=destination, path=filename)
 
 @app.route('/upload_chisel', methods=['POST', 'GET'])
 def upload_chisel():
-    return render_template("chisel_upload.html",
-                           current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
-                           current_tasks=gi.current_tasks)
+    global current_tasks
+    # print(gi.current_tasks)
+    counter = 0
+    if request.method != 'POST':
+        # print("In not post")
+        return render_template("chisel_upload.html",
+                               current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
+                               current_tasks=gi.current_tasks)
+
+    if request.form['HiddenField'] == 'ModifyFile':
+        id = request.form['ID']
+        filename = request.form['FileName']
+        filetype = request.form['FileType'] if request.form['FileType'] != 'No Change' else get_task_map_id_file_info(
+            id, filename, "filetype")
+        included = True if request.form['Included'] == "True" else False
+
+        # status = ""
+        # print(f"id: {id}")
+        # print(f"filename: {filename}")
+        # print(f"filetype: {filetype}")
+        # print(f"transform: {transform}")
+        # print(f"included: {included}")
+
+        add_to_task_map(id, filename, filetype, included)
+
+        modify_job_included(id, filename, included)
+        print(f"[INFO] Task Map: {gi.current_tasks}", flush=True)
+        return render_template("chisel_upload.html",
+                               current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
+                               current_tasks=gi.current_tasks)
+    elif request.form['HiddenField'] == 'UploadFile':
+        try:
+            current_series_ids = sorted(os.listdir(app.config['UPLOAD_FOLDER']))
+        except:
+            os.mkdir(app.config['UPLOAD_FOLDER'])
+            current_series_ids = sorted(os.listdir(app.config['UPLOAD_FOLDER']))
+
+        if request.form['JobID'] == "New Job" and len(current_series_ids) > 0:
+            id = str(int(current_series_ids[-1]) + 1)
+        else:
+            id = "1"
+
+        upload_space = os.path.join(app.config['UPLOAD_FOLDER'], id)
+        if not os.path.isdir(upload_space):
+            os.mkdir(upload_space)
+
+        if 'files[]' not in request.files:
+            flash('No files found, try again.')
+            return redirect(request.url)
+
+        files = request.files.getlist('files[]')
+        for file in files:
+            if file:
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(upload_space, filename))
+                transform = "Not Specified"
+                filetype, included = "Not Specified", False
+                # TODO: Define Logic to Make JobInfo Included List
+                add_to_task_map(id, filename, filetype, included)
+        return render_template("chisel_upload.html", id=id,
+                               current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
+                               current_tasks=gi.current_tasks)
+
+    elif request.form['HiddenField'] == 'RunJob':
+        id = request.form['JobID']
+        transform = request.form['JobTransform']
+        job_status = "Must Pipe Output"
+        update_job_info(id, transform, job_status)
+
+        status, message, original_bin, transformed_bin, transformed_bin_type = api_methods.gtirb_run_transform_set(id)
+        update_job_info(id, transform=gi.current_tasks[id]["JobInfo"]["transform"],
+                        status=gi.current_tasks[id]["JobInfo"]["status"])
+        if status != "200":
+            path = os.path.join(app.config["UPLOAD_FOLDER"], id)
+            if os.path.exists(os.path.join(path, "ErrorLog.txt")):
+                add_to_task_map(id, "ErrorLog.txt", "Log (Do Not Include)", False)
+            return render_template("chisel_upload.html",
+                                   current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
+                                   current_tasks=gi.current_tasks)
+        # Status == "200" and can assume this is true
+        add_to_task_map(id, transformed_bin, transformed_bin_type, included=False)
+        if transformed_bin_type == "dynamic binary" or transformed_bin_type == "static binary":
+            client.send_data_to_GSA_server(id, original_bin, transformed_bin)
+            metrics_dir = f"{transformed_bin}-gsa-metrics"
+            add_to_task_map(id, metrics_dir, "directory (do not include)", False)
+            # TODO: Modify client to collect the name of the stats output dir and add to task map
+        return render_template("chisel_upload.html",
+                               current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
+                               current_tasks=gi.current_tasks)
+    elif request.form['HiddenField'] == 'DownloadJob':
+        id = request.form['JobID']
+        filename, destination = make_archive(id)
+        return send_from_directory(directory=destination, path=filename)
 
 
 def update_job_info(id, job_transform, job_status):
@@ -138,24 +238,25 @@ def update_job_info(id, job_transform, job_status):
         print(e)
 
 
-def add_to_task_map(id, filename, transform, filetype, included):
+def add_to_task_map(id, filename, filetype, included):
     # Task Map Structure is as follows
     # { id:{filename: [filetype, transform, status], "JobInfo": [transform, status]}, ...,
     #   id+n:{filename: [filetype, transform, status], "JobInfo": [transform, status]} }
     try:
-        gi.current_tasks[id][filename] = {"filetype": filetype, "transform": transform, "included": included}
+        gi.current_tasks[id][filename] = {"filetype": filetype, "included": included}
 
     except KeyError:
-        gi.current_tasks[id] = {filename: {"filetype": filetype, "transform": transform, "included": included},
-                                "JobInfo": {"transform": transform, "status": "None To Report"}}
+        gi.current_tasks[id] = {filename: {"filetype": filetype, "included": included},
+                                "JobInfo": {"transform": "", "status": "None To Report", "included": []}}
+
 
 def update_job_info(id, transform="", status="", included=""):
     # Update transform
     if transform != "":
         gi.current_tasks[id]["JobInfo"]["transform"] = transform
 
-    if included != "":
-        gi.current_tasks[id]["JobInfo"]["included"] = included
+    # if included != "":
+    #     gi.current_tasks[id]["JobInfo"]["included"] = included
     # Update Status
     if status == "":
         return
@@ -165,11 +266,51 @@ def update_job_info(id, transform="", status="", included=""):
         gi.current_tasks[id]["JobInfo"]["status"] += status
 
 
+def modify_job_included(id, filename, included):
+    """
+        id (string): id of job to modify
+        filename (string): filename that will be added or removed from
+                           the included list
+        included (bool): the logic control that will enable the addition
+                         or removal of filename
+    """
+
+    for gi_filename in gi.current_tasks[id]["JobInfo"]["included"]:
+        if included and gi_filename == filename:
+            #Item already in the included list
+            return
+        if not included and gi_filename == filename:
+            gi.current_tasks[id]["JobInfo"]["included"].remove(gi_filename)
+            return
+    gi.current_tasks[id]["JobInfo"]["included"].append(filename)
+
+
 def get_task_map_id(id):
     return gi.current_tasks[id]
 
+
 def get_task_map_id_file_info(id, filename, index):
     return gi.current_tasks[id][filename][index]
+
+
+def make_archive(id):
+    source = os.path.join("uploads", id)
+    destination = source
+    base_dir = os.path.basename(destination)
+    name = base_dir
+    file_format = "zip"
+    archive_from = os.path.dirname(source)
+    archive_to = os.path.basename(source.strip(os.sep))
+
+    if os.path.exists(os.path.join(destination, f'{name}.{file_format}')):
+        os.remove(os.path.join(destination, f'{name}.{file_format}'))
+
+    shutil.make_archive(name, file_format, archive_from, archive_to)
+    try:
+        shutil.move(f'{name}.{file_format}', destination)
+    except shutil.Error:
+        os.remove(f'{name}.{file_format}')
+    return f'{name}.{file_format}', destination
 
 if __name__ == "__main__":
     print('to upload files navigate to http://10.0.2.15:5000/upload_gtirb')

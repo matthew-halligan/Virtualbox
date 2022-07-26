@@ -16,5 +16,5 @@ def send_data_to_GSA_server(index, sourceBinaryName, transformBinaryName):
         s.sendall(data_encoded)
         data = s.recv(BUFFER_SIZE)
      
-    print(f"Successfully sent {data!r} to GSA server")
-    print(f"Metrics for analysis are found in /uploads/{i}")
+    print(f"Successfully sent {data!r} to GSA server", flush=True)
+    print(f"Metrics for analysis are found in /uploads/{index}", flush=True)
