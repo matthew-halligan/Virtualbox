@@ -7,8 +7,9 @@ PORT = gi.PORT_HOST_GSA  # The port used by the server GSA container
 BUFFER_SIZE = 1024 #Figure out limit later. Smaller buffer = faster writes
 
 # TODO: Call this function from app.upload_file() after upload/download completion
-def send_data_to_GSA_server(index, sourceBinaryName, transformBinaryName):
-    data_encoded = str(index + "," + sourceBinaryName + ',' + transformBinaryName).encode()
+def send_data_to_GSA_server(index, source_binary_name, transform_binary_name, metrics_collection):
+    data_encoded = str(index + "," + source_binary_name + ','
+                       + transform_binary_name + ',' + metrics_collection).encode()
     print(data_encoded)
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
