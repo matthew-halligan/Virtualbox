@@ -105,7 +105,8 @@ def modify_or_upload_files():
         id = request.form['JobID']
         transform = request.form['JobTransform']
         job_status = "Must Pipe Output"
-        update_job_info(id, transform, job_status)
+        metrics_collection = request.form['JobMetrics']
+        update_job_info(id, transform, job_status, metrics_collection)
 
         status, message, original_bin, transformed_bin, transformed_bin_type = api_methods.gtirb_run_transform_set(id)
         update_job_info(id, transform=gi.current_tasks[id]["JobInfo"]["transform"], status=gi.current_tasks[id]["JobInfo"]["status"])
@@ -119,8 +120,8 @@ def modify_or_upload_files():
         # Status == "200" and can assume this is true
         add_to_task_map(id, transformed_bin, transformed_bin_type, included=False)
         if transformed_bin_type == "dynamic binary" or transformed_bin_type == "static binary":
-            client.send_data_to_GSA_server(id, original_bin, transformed_bin)
-            metrics_dir = f"{transformed_bin}-gsa-metrics"
+            client.send_data_to_GSA_server(id, original_bin, transformed_bin, metrics_collection)
+            metrics_dir = f"gsa-metrics-{metrics_collection}-{transformed_bin}"
             add_to_task_map(id, metrics_dir, "directory (do not include)", False)
             # TODO: Modify client to collect the name of the stats output dir and add to task map
         return render_template("gtirb_upload.html",
@@ -200,7 +201,8 @@ def upload_chisel():
         id = request.form['JobID']
         transform = request.form['JobTransform']
         job_status = "Must Pipe Output"
-        update_job_info(id, transform, job_status)
+        metrics_collection = request.form['JobMetrics']
+        update_job_info(id, transform, job_status, metrics_collection)
 
         status, message, original_bin, transformed_bin, transformed_bin_type = api_methods.gtirb_run_transform_set(id)
         update_job_info(id, transform=gi.current_tasks[id]["JobInfo"]["transform"],
@@ -215,7 +217,7 @@ def upload_chisel():
         # Status == "200" and can assume this is true
         add_to_task_map(id, transformed_bin, transformed_bin_type, included=False)
         if transformed_bin_type == "dynamic binary" or transformed_bin_type == "static binary":
-            client.send_data_to_GSA_server(id, original_bin, transformed_bin)
+            client.send_data_to_GSA_server(id, original_bin, transformed_bin, metrics_collection)
             metrics_dir = f"{transformed_bin}-gsa-metrics"
             add_to_task_map(id, metrics_dir, "directory (do not include)", False)
             # TODO: Modify client to collect the name of the stats output dir and add to task map
@@ -238,7 +240,7 @@ def update_job_info(id, job_transform, job_status):
         print(e)
 
 
-def add_to_task_map(id, filename, filetype, included):
+def add_to_task_map(id, filename, filetype, included, metrics=""):
     # Task Map Structure is as follows
     # { id:{filename: [filetype, transform, status], "JobInfo": [transform, status]}, ...,
     #   id+n:{filename: [filetype, transform, status], "JobInfo": [transform, status]} }
@@ -247,10 +249,10 @@ def add_to_task_map(id, filename, filetype, included):
 
     except KeyError:
         gi.current_tasks[id] = {filename: {"filetype": filetype, "included": included},
-                                "JobInfo": {"transform": "", "status": "None To Report", "included": []}}
+                                "JobInfo": {"transform": "", "status": "None To Report", "included": [], "metrics": metrics}}
 
 
-def update_job_info(id, transform="", status="", included=""):
+def update_job_info(id, transform="", status="", included="", metrics_collection=""):
     # Update transform
     if transform != "":
         gi.current_tasks[id]["JobInfo"]["transform"] = transform
@@ -265,6 +267,8 @@ def update_job_info(id, transform="", status="", included=""):
     else:
         gi.current_tasks[id]["JobInfo"]["status"] += status
 
+    if metrics_collection != "":
+        gi.current_tasks[id]["JobInfo"]["metrics"] = metrics_collection
 
 def modify_job_included(id, filename, included):
     """
