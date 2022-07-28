@@ -7,6 +7,8 @@
     <script src="{{url_for('static', filename='js/get_update.js')}}" type="text/javascript"></script>
     <script src="{{url_for('static', filename='js/validate_gtirb_job.js')}}" type="text/javascript"></script>
     <script src="{{url_for('static', filename='js/validate_file_uploads.js')}}" type="text/javascript"></script>
+    <script src="{{url_for('static', filename='js/validate_file_mod.js')}}" type="text/javascript"></script>
+    <script src="{{url_for('static', filename='js/jquery-3.5.1.js')}}" type="text/javascript"></script>
 
     <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
     <title>TPCP Portal</title>
@@ -128,6 +130,26 @@
         border-radius: 1em;
     }
 
+    .display-inline{
+        display: inline-block;
+    }
+
+    .text-green {
+        color: green;
+    }
+    .text-red {
+        color: red;
+    }
+    .float-right{
+        float: right;
+    }
+
+    .child-coloring:nth-child(odd){
+        background-color: #b7cbd4;
+        border-radius: 0.4em;
+    }
+
+
     </style>
 </head>
 <body>
@@ -184,43 +206,73 @@
                         <th>IDs</th>
                         <th>Filename</th>
                         <th>File type</th>
-                        <th></th>
+                        <th>Detected Dynamic Dependencies</th>
                         <th>Included</th>
                         <th>Update</th>
                       </tr></thead>
                     <tbody>
                         {% for key in current_tasks[item].keys() %}
                         {% if key != "JobInfo" %}
-                            <form method="post" onsubmit="upload_table()">
+                            <form method="post" name="entry_{{key}}"onsubmit="validate_file_mod('{{key}}')">
                                 <input type="hidden" value="ModifyFile" name="HiddenField">
                                 <tr>
                                     <td><input name="ID" type="hidden" value="{{item}}">{{item}}</td>
                                     <td><input name="FileName" type="hidden"value="{{key}}"> {{key}}</td>
                                     <td>
-                                        {{current_tasks[item][key]["filetype"]}}:
-                                        <select id="FileType" name="FileType">
-                                            <option value="No Change">No Change</option>
-                                            <option value="binary">c/c++ binary</option>
-                                            <option value="library">library</option>
-                                            <option value="gtirb">gtirb</option>
-                                        </select>
+
+                                        {% if current_tasks[item][key]['filetype'] not in ["Log", "Directory"] %}
+                                            {{current_tasks[item][key]["filetype"]}}:
+                                            <input type="hidden" value="{{current_tasks[item][key]['filetype']}}" id="HiddenFileType{{item}}" name="HiddenFileType{{item}}">
+                                            <select id="FileType" name="FileType" id="FileType{{item}}">
+                                                <option value="No Change">No Change</option>
+                                                <option value="binary">c/c++ binary</option>
+                                                <option value="library">library</option>
+<!--                                                <option value="gtirb">gtirb</option>-->
+                                            </select>
+                                        {% else %}
+                                            {{current_tasks[item][key]["filetype"]}}
+                                            <p style="display: inline-block;"> (Not Modifiable)</p>
+                                        {% endif %}
                                     </td>
                                     <td>
     <!--                                    TODO: Find a valuable use of this space-->
 
+                                        {% if current_tasks[item][key]['dependency_libs'] != "" %}
+                                            {% for dependency in current_tasks[item][key]['dependency_libs'] %}
+                                                <section class="child-coloring">
+                                                    <p class="display-inline">{{dependency}}</p>
+                                                    <p
+                                                        {% if dependency in current_tasks[item].keys()%}
+                                                            class="display-inline text-green float-right">(present)
+                                                        {% else %}
+                                                            class="display-inline text-red float-right">(not present)
+                                                        {% endif %}
+                                                    </p>
+                                                </section>
+
+                                            {% endfor %}
+                                        {% endif %}
                                     </td>
                                     <td id="Included-TD">
-                                        <input name="Included" id="Included-True" type="radio" value="True"
-                                               {% if current_tasks[item][key]['included'] == True%} checked {% endif %}
-                                        > Yes, Include
-                                        </br>
-                                        <input name="Included" id="Included-False" type="radio" value="False"
-                                        {% if current_tasks[item][key]['included'] == False%} checked {% endif %}
-                                        > No, Do Not Include
+                                        {% if current_tasks[item][key]['filetype'] not in ["Log", "Directory"] %}
+                                            <input name="Included" id="Included-True{{key}}" type="radio" value="True"
+                                                   {% if current_tasks[item][key]['included'] == True%} checked {% endif %}
+                                            > Yes, Include
+                                            </br>
+                                            <input name="Included" id="Included-False{{key}}" type="radio" value="False"
+                                            {% if current_tasks[item][key]['included'] == False%} checked {% endif %}
+                                            > No, Do Not Include
+                                        {% else %}
+                                            <p>Not Includable</p>
+                                        {% endif %}
                                     </td>
 
                 <!--                      <td><input name="Status" type="hidden" value="{{current_tasks[item][key][2]}}">{{current_tasks[item][key][2]}}</td>-->
-                                    <td><input type="submit" value='Update Entry' id="uploads_table"></td>
+                                    <td>
+                                        {% if current_tasks[item][key]['filetype'] not in ["Log", "Directory"] %}
+                                            <input type="submit" value='Update Entry' id="uploads_table">
+                                        {% endif %}
+                                    </td>
                                 </tr>
                             </form>
                         {% endif %}
@@ -228,7 +280,7 @@
                         <thead><tr>
                             <th>Job ID</th>
                             <th>File(s) Included</th>
-                            <th>Transforms to Run & Metrics To Collect</th>
+                            <th style="width: 10%">Transforms to Run & Metrics To Collect</th>
                             <th>Status</th>
                             <th></th>
                             <th></th>
