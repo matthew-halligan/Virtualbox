@@ -1,4 +1,8 @@
+import json
+import subprocess
+
 import requests as re
+import re as regex
 import global_items as gi
 import os
 import textwrap
@@ -141,7 +145,9 @@ def gtirb_run_transform_set(uploads_id: str):
         except SystemError:
             message = "Error encountered by server.\nError information stored in 'ErrorLog.txt'"
             with open(os.path.join(os.path.join("uploads", uploads_id), "ErrorLog.txt"), "w") as EL:
-                EL.write(response.text)
+                parsed = json.loads(response.text)
+                parsed_response = json.dumps(parsed, indent=2, sort_keys=True)
+                EL.write(parsed_response)
     else:
         # TODO: Add contact information for developers
         message = f"Return status: {status} not explicitly handled by this server.  Please report this error to development"
@@ -152,7 +158,7 @@ def pretty_print_POST(req):
     At this point it is completely built and ready
     to be fired; it is "prepared".
 
-    However pay attention at the formatting used in
+    However, pay attention at the formatting used in
     this function because it is programmed to be pretty
     printed and may differ from the actual request.
     """
@@ -165,7 +171,19 @@ def pretty_print_POST(req):
 
     print(textwrap.fill(text, width=80))
 
+def get_bin_ldd(id, filename):
+    path_to_bin = os.path.join(os.path.join("uploads", id), filename)
 
+    lddOut = subprocess.check_output(["ldd", path_to_bin]).decode('utf-8') #, stdout=subprocess.PIPE)
+    libraries = []
+    for line in lddOut.splitlines():
+        # Regular Expression looks for lines that contain ' => '
+        # It automatically excludes the vdso file
+        match = regex.match(r'\t(.*) => (.*) \(0x', line)
+        if match:
+            libraries.append(match.group(1))
+    print(f"[INFO] libraries identified as dynamic dependencies of {filename}:\n{libraries}", flush=True)
+    return libraries
 # gi.current_tasks = {'1': {'ld-linux-x86-64.so.2': ['library', 'Not Specified', 'fine'], 'JobInfo': ['Not Specified', 'None To Report'], 'libc.so.6': ['library', 'Not Specified', 'fine'], 'libdl.so.2': ['library', 'Not Specified', 'fine'], 'libpcre2-8.so.0': ['library', 'Not Specified', 'fine'], 'libpthread.so.0': ['library', 'Not Specified', 'fine'], 'libselinux.so.1': ['library', 'Not Specified', 'fine'], 'ls': ['binary', 'Not Specified', 'fine']}}
 # gtirb_run_transform_set('1')
 if __name__ == "__main__":
@@ -174,5 +192,7 @@ if __name__ == "__main__":
     assert gen_filename("ls", "ddisasm") == ("ls.d", "gtirb")
     print("[gen_filename] All Test Cases Passed")
     gi.current_tasks = {'1': {'ls': {'filetype': 'c/c++ binary', 'transform': 'GTIRB-ddisasm', 'status': ''}, 'JobInfo': {'transform': 'GTIRB-ddisasm', 'status': 'None To ReportMust Pipe OutputNone To ReportMust Pipe Output'}}}
-
-    gtirb_run_transform_set("1")
+    if os.path.exists("uploads/1/ls"):
+        assert get_bin_ldd("1", "ls") == ['libselinux.so.1', 'libc.so.6', 'libpcre2-8.so.0', 'libdl.so.2', 'libpthread.so.0']
+    print("[get_bin_ldd] All Test Cases Passed")
+    # gtirb_run_transform_set("1")
