@@ -1,5 +1,6 @@
 import sys, os, shutil
 import global_items as gi
+import json
 
 
 import api_methods
@@ -52,15 +53,19 @@ def modify_or_upload_files():
         filename = request.form['FileName']
         filetype = request.form['FileType'] if request.form['FileType'] != 'No Change' else get_task_map_id_file_info(id, filename, "filetype")
         included = True if request.form['Included'] == "True" else False
-
+        dependency_libs = ""
         # status = ""
         # print(f"id: {id}")
         # print(f"filename: {filename}")
         # print(f"filetype: {filetype}")
         # print(f"transform: {transform}")
         # print(f"included: {included}")
-
-        add_to_task_map(id, filename, filetype, included)
+        if filetype[-6:] == "binary":
+            print("[INFO] Filetype identified as binary", flush=True)
+            dependency_libs = api_methods.get_bin_ldd(id, filename)
+            print(f"[INFO] libraries identified as dynamic dependencies of {filename}:\n{dependency_libs}", flush=True)
+            print(f"[INFO] Dynamic Dependency Item Type: {type(dependency_libs)}")
+        add_to_task_map(id, filename, filetype, included, dependency_libs=dependency_libs)
 
         modify_job_included(id, filename, included)
         print(f"[INFO] Task Map: {gi.current_tasks}", flush=True)
@@ -93,10 +98,13 @@ def modify_or_upload_files():
             if file:
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(upload_space, filename))
-                transform = "Not Specified"
-                filetype, included = "Not Specified", False
-                # TODO: Define Logic to Make JobInfo Included List
+                included = True
+                filetype = "library"
                 add_to_task_map(id, filename, filetype, included)
+                modify_job_included(id, filename, included)
+
+                # TODO: Define Logic to Make JobInfo Included List
+
         return render_template("gtirb_upload.html", id=id,
                        current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
                        current_tasks=gi.current_tasks)
@@ -113,7 +121,7 @@ def modify_or_upload_files():
         if status != "200":
             path = os.path.join(app.config["UPLOAD_FOLDER"], id)
             if os.path.exists(os.path.join(path, "ErrorLog.txt")):
-                add_to_task_map(id, "ErrorLog.txt", "Log (Do Not Include)", False)
+                add_to_task_map(id, "ErrorLog.txt", "Log", False)
             return render_template("gtirb_upload.html",
                                    current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
                                    current_tasks=gi.current_tasks)
@@ -122,7 +130,7 @@ def modify_or_upload_files():
         if transformed_bin_type == "dynamic binary" or transformed_bin_type == "static binary":
             client.send_data_to_GSA_server(id, original_bin, transformed_bin, metrics_collection)
             metrics_dir = f"gsa-metrics-{metrics_collection}-{transformed_bin}"
-            add_to_task_map(id, metrics_dir, "directory (do not include)", False)
+            add_to_task_map(id, metrics_dir, "Directory", False)
             # TODO: Modify client to collect the name of the stats output dir and add to task map
         return render_template("gtirb_upload.html",
                                current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
@@ -240,15 +248,17 @@ def update_job_info(id, job_transform, job_status):
         print(e)
 
 
-def add_to_task_map(id, filename, filetype, included, metrics=""):
+def add_to_task_map(id, filename, filetype, included, metrics="", dependency_libs=""):
     # Task Map Structure is as follows
     # { id:{filename: [filetype, transform, status], "JobInfo": [transform, status]}, ...,
     #   id+n:{filename: [filetype, transform, status], "JobInfo": [transform, status]} }
     try:
-        gi.current_tasks[id][filename] = {"filetype": filetype, "included": included}
+        print(f"[INFO] Dynamic Dependencies Received: {type(dependency_libs)}")
+        gi.current_tasks[id][filename] = {"filetype": filetype, "included": included,
+                                          "dependency_libs": dependency_libs}
 
     except KeyError:
-        gi.current_tasks[id] = {filename: {"filetype": filetype, "included": included},
+        gi.current_tasks[id] = {filename: {"filetype": filetype, "included": included, "dependency_libs": dependency_libs},
                                 "JobInfo": {"transform": "", "status": "None To Report", "included": [], "metrics": metrics}}
 
 
@@ -315,6 +325,9 @@ def make_archive(id):
     except shutil.Error:
         os.remove(f'{name}.{file_format}')
     return f'{name}.{file_format}', destination
+
+
+
 
 if __name__ == "__main__":
     print('to upload files navigate to http://10.0.2.15:5000/upload_gtirb')
