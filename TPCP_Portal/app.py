@@ -49,26 +49,30 @@ def modify_or_upload_files():
                                current_tasks=gi.current_tasks)
 
     if request.form['HiddenField'] == 'ModifyFile':
+
         id = request.form['ID']
         filename = request.form['FileName']
-        filetype = request.form['FileType'] if request.form['FileType'] != 'No Change' else get_task_map_id_file_info(id, filename, "filetype")
-        included = True if request.form['Included'] == "True" else False
+        try:
+            filetype = request.form['FileType'] if request.form['FileType'] != 'No Change' else get_task_map_id_file_info(id, filename, "filetype")
+        except:
+            filetype = get_task_map_id_file_info(id, filename, "filetype")
+            print(f"[Info] 'FileType' field not detected.  Setting to what is stored in the task map: {filetype}", flush=True)
+        try:
+            included = True if request.form['Included'] == "True" else False
+        except:
+            included=False
+            print("[INFO] 'Included' field not detected. Setting to False by default.", flush=True)
+
         dependency_libs = ""
-        # status = ""
-        # print(f"id: {id}")
-        # print(f"filename: {filename}")
-        # print(f"filetype: {filetype}")
-        # print(f"transform: {transform}")
-        # print(f"included: {included}")
+
         if filetype[-6:] == "binary":
-            print("[INFO] Filetype identified as binary", flush=True)
             dependency_libs = api_methods.get_bin_ldd(id, filename)
-            print(f"[INFO] libraries identified as dynamic dependencies of {filename}:\n{dependency_libs}", flush=True)
-            print(f"[INFO] Dynamic Dependency Item Type: {type(dependency_libs)}")
+        elif filetype in ["Log", "Directory"]:
+            r_filename, destination = make_archive(id, filename)
+            return send_from_directory(directory=destination, path=r_filename)
         add_to_task_map(id, filename, filetype, included, dependency_libs=dependency_libs)
 
         modify_job_included(id, filename, included)
-        print(f"[INFO] Task Map: {gi.current_tasks}", flush=True)
         return render_template("gtirb_upload.html",
                                current_series_ids=sorted(os.listdir(app.config['UPLOAD_FOLDER'])),
                                current_tasks=gi.current_tasks)
@@ -307,8 +311,11 @@ def get_task_map_id_file_info(id, filename, index):
     return gi.current_tasks[id][filename][index]
 
 
-def make_archive(id):
+def make_archive(id, directory=""):
     source = os.path.join("uploads", id)
+    if directory != "":
+        source = os.path.join(os.path.join("uploads", id), directory)
+
     destination = source
     base_dir = os.path.basename(destination)
     name = base_dir
