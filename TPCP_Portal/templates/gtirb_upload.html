@@ -213,7 +213,7 @@
                     <tbody>
                         {% for key in current_tasks[item].keys() %}
                         {% if key != "JobInfo" %}
-                            <form method="post" name="entry_{{key}}"onsubmit="validate_file_mod('{{key}}')">
+                            <form method='post' name="entry_{{key}}"onsubmit="validate_file_mod('{{key}}')">
                                 <input type="hidden" value="ModifyFile" name="HiddenField">
                                 <tr>
                                     <td><input name="ID" type="hidden" value="{{item}}">{{item}}</td>
@@ -231,11 +231,11 @@
                                             </select>
                                         {% else %}
                                             {{current_tasks[item][key]["filetype"]}}
+<!--                                            <input type="hidden" value="{{current_tasks[item][key]['filetype']}}" id="HiddenFileType{{item}}" name="FileType">-->
                                             <p style="display: inline-block;"> (Not Modifiable)</p>
                                         {% endif %}
                                     </td>
                                     <td>
-    <!--                                    TODO: Find a valuable use of this space-->
 
                                         {% if current_tasks[item][key]['dependency_libs'] != "" %}
                                             {% for dependency in current_tasks[item][key]['dependency_libs'] %}
@@ -263,15 +263,20 @@
                                             {% if current_tasks[item][key]['included'] == False%} checked {% endif %}
                                             > No, Do Not Include
                                         {% else %}
+<!--                                            <input name="Included" id="Included-False{{key}}" type="hidden" value="False"-->
                                             <p>Not Includable</p>
                                         {% endif %}
                                     </td>
 
                 <!--                      <td><input name="Status" type="hidden" value="{{current_tasks[item][key][2]}}">{{current_tasks[item][key][2]}}</td>-->
                                     <td>
-                                        {% if current_tasks[item][key]['filetype'] not in ["Log", "Directory"] %}
-                                            <input type="submit" value='Update Entry' id="uploads_table">
-                                        {% endif %}
+                                            {% if current_tasks[item][key]['filetype'] not in ["Log", "Directory"] %}
+                                                <input type="submit" value='Update Entry'id="uploads_table">
+                                            {% elif current_tasks[item][key]['filetype'] in ["Log", "Directory"] %}
+                                                <input type="submit" value='Download Entry'id="uploads_table">
+                                            {% endif %}
+
+
                                     </td>
                                 </tr>
                             </form>
