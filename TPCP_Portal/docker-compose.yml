@@ -1,0 +1,58 @@
+version: "3"
+services:
+#  chisel:
+#    image: grammatech/chisel
+#    container_name: chisel
+#    #ports:
+#      #- "80:80"
+#    hostname: chisel
+#    networks:
+#      net:
+#        ipv4_address: 172.20.0.5
+#    tty: true
+  gtirb:
+    image: grammatech/gtirb-server
+    container_name: gtirb
+    ports:
+      - "80:80"
+    hostname: gtirb
+    networks:
+      net:
+        ipv4_address: 172.20.0.6
+  flask-app:
+    image: tpcp_portal:v4
+    #stdin_open: true
+    #tty: true
+    container_name: flaskapp
+    depends_on:
+      - gtirb
+    hostname: flaskapp
+    networks:
+      net:
+        ipv4_address: 172.20.0.7
+    ports:
+      - "5000:5000"
+#    volumes:
+#      - /tmp/uploads:/app/uploads
+#      - ./:/app
+  gsa:
+    image: ijustincabral/gsa:beta
+    container_name: gsa
+    ports:
+      - "6000:6000"
+    hostname: gsa
+    stdin_open: true
+    tty: true
+    networks:
+      net:
+        ipv4_address: 172.20.0.8
+    volumes:
+      - ./uploads:/GadgetSetAnalyzer/src/uploads
+      - ./gsa-server:/GadgetSetAnalyzer/src/server
+    command: bash -c "python3 server/server.py"
+
+networks:
+  net:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
