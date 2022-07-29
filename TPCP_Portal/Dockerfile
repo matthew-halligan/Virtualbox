@@ -4,15 +4,18 @@ WORKDIR /app
 
 
 COPY app.py /app
+COPY api_methods.py /app
+COPY client.py /app
+COPY global_items.py /app
+COPY requirements.txt /app
+
 ADD templates /app/templates
 ADD static /app/static
-COPY requirements.txt /app
-COPY gtirb.sh /app
+
 
 RUN pip3 install --trusted-host pypi.org \
               --trusted-host files.pythonhosted.org -r requirements.txt
               
-RUN apt-get install curl && apt-get install ping
 
 EXPOSE 5000
 
