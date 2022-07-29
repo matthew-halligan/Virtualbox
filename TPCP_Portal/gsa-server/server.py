@@ -4,7 +4,7 @@ import sys
 
 import global_items as gi
 
-HOST = gi.IP_HOST_GSA #This would be the server IP based on the docker-compose.yml
+HOST = gi.IP_HOST_GSA #This would be the server IP based on the docker-compose-dev.yml
 PORT = gi.PORT_HOST_GSA #This would be the exposed port that we're communicating on
 BUFFER_SIZE = 1024#In bytes (Only need 1 byte for indexes 0-255. Small buffer = fast read/writes)
 
