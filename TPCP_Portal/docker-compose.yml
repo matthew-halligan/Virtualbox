@@ -13,14 +13,14 @@ services:
   gtirb:
     image: grammatech/gtirb-server
     container_name: gtirb
-    ports:
+    ports: 
       - "80:80"
-    hostname: gtirb
+    hostname: gtirb    
     networks:
       net:
         ipv4_address: 172.20.0.6
   flask-app:
-    image: tpcp_portal:v4
+    image: tpcp_portal:v2
     #stdin_open: true
     #tty: true
     container_name: flaskapp
@@ -31,10 +31,10 @@ services:
       net:
         ipv4_address: 172.20.0.7
     ports:
-      - "5000:5000"
-#    volumes:
+      - "5000:5000"  
+    volumes:
 #      - /tmp/uploads:/app/uploads
-#      - ./:/app
+      - ./:/app
   gsa:
     image: ijustincabral/gsa:beta
     container_name: gsa
