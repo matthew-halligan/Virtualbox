@@ -1,4 +1,4 @@
-import sys, os, shutil
+import sys, os, shutil, datetime
 import global_items as gi
 import json
 
@@ -333,7 +333,18 @@ def make_archive(id, directory=""):
         os.remove(f'{name}.{file_format}')
     return f'{name}.{file_format}', destination
 
+def flask_logger():
+    """creates logging information"""
+    for i in range(100):
+        current_time = datetime.datetime.now().strftime('%H:%M:%S') + "\n"
+        yield current_time.encode()
+        sleep(1)
 
+
+@APP.route("/log_stream", methods=["GET"])
+def stream():
+    """returns logging information"""
+    return Response(flask_logger(), mimetype="text/plain", content_type="text/event-stream")
 
 
 if __name__ == "__main__":
