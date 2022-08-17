@@ -19,7 +19,6 @@
 </body>
 <script type="text/javascript">
     function get_server_data(cFunction, htmlID, apiRoute){
-        //document.getElementById("chatarea").scrollIntoView(false);
           var server_data=new XMLHttpRequest(cFunction);
           server_data.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
