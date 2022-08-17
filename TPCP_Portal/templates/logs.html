@@ -1,4 +1,17 @@
 <!doctype html>
+<head>
+    <style>
+        #logs {
+		height:440px;
+		background-color:#CCC;	
+        overflow-y:auto;
+		position:relative;
+		margin-left:-5px;
+        border-style: solid;
+    }
+
+    </style>
+</head>
 <body>
 <div id="logs">
 {{ piped_logs }}
@@ -6,28 +19,24 @@
 </body>
 <script type="text/javascript">
     function get_server_data(cFunction, htmlID, apiRoute){
+        //document.getElementById("chatarea").scrollIntoView(false);
           var server_data=new XMLHttpRequest(cFunction);
-
           server_data.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
                 cFunction(this, htmlID);
                 }
           };
-
           server_data.open("GET", apiRoute, true);
           server_data.send(null)
       }
-
     function UpdateCounter(server_data, htmlID){
         document.getElementById(htmlID).innerHTML = server_data.responseText;
     }
     function UpdateForm(server_data, htmlID){
-        document.getElementById(htmlID+"-TD").innerHTML = "<input name='"+ htmlID +"' id='"+ htmlID +"' type='hidden' value=''>" + server_data.responseText;
+        document.getElementById(htmlID).innerHTML = server_data.responseText;
         document.getElementById(htmlID).value = server_data.responseText;
     }
-
     var updateInterval = 1000;
     setInterval(function(){get_server_data(UpdateCounter, "logs", '/api/methods/logger')}, updateInterval)
-    //setInterval(function(){get_server_data(UpdateForm, "JobStatus", '/api/methods/get_counter')}, updateInterval)
-
+</script>
 </script>

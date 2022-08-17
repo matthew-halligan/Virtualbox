@@ -25,7 +25,7 @@ if not os.path.isdir(UPLOAD_FOLDER):
 
 @app.route('/logs')
 def logger_render():
-    #gi.docker_logs = api_methods.logger()
+    gi.docker_logs = api_methods.logger()
     return render_template("logs.html", piped_logs=gi.docker_logs)
 
 @app.route('/upload_gtirb')

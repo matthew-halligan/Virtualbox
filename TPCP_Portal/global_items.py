@@ -2,7 +2,7 @@
 current_tasks = {}
 counter = 0
 
-docker_logs = ""
+docker_logs = "" + "\n"
 
 IP_HOST_GTIRB = "172.20.0.6"
 PORT_HOST_GTIRB = 80
