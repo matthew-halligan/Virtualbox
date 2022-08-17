@@ -17,12 +17,16 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # Centralized URL Map
 app.add_url_rule('/api/methods/get_counter', methods=['GET'], view_func=api_methods.get_counter)
 app.add_url_rule('/api/methods/gtirb_run_transform', methods=['GET'], view_func=api_methods.gtirb_run_transform_set)
+app.add_url_rule('/api/methods/logger', methods=['GET'], view_func=api_methods.logger)
 
 # Check that the upload folder exists
 if not os.path.isdir(UPLOAD_FOLDER):
     os.mkdir(UPLOAD_FOLDER)
 
-
+@app.route('/logs')
+def logger_render():
+    #gi.docker_logs = api_methods.logger()
+    return render_template("logs.html", piped_logs=gi.docker_logs)
 
 @app.route('/upload_gtirb')
 def upload():
@@ -332,19 +336,6 @@ def make_archive(id, directory=""):
     except shutil.Error:
         os.remove(f'{name}.{file_format}')
     return f'{name}.{file_format}', destination
-
-def flask_logger():
-    """creates logging information"""
-    for i in range(100):
-        current_time = datetime.datetime.now().strftime('%H:%M:%S') + "\n"
-        yield current_time.encode()
-        sleep(1)
-
-
-@APP.route("/log_stream", methods=["GET"])
-def stream():
-    """returns logging information"""
-    return Response(flask_logger(), mimetype="text/plain", content_type="text/event-stream")
 
 
 if __name__ == "__main__":

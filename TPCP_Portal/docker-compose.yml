@@ -19,10 +19,12 @@ services:
     networks:
       net:
         ipv4_address: 172.20.0.6
+
   flask-app:
     image: tpcp_portal:v2
     #stdin_open: true
     #tty: true
+    user: root
     container_name: flaskapp
     depends_on:
       - gtirb
@@ -35,6 +37,7 @@ services:
     volumes:
 #      - /tmp/uploads:/app/uploads
       - ./:/app
+      - /var/run/docker.sock:/var/run/docker.sock
   gsa:
     image: ijustincabral/gsa:beta
     container_name: gsa

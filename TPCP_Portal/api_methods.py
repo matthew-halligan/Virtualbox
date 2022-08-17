@@ -1,4 +1,5 @@
 import json
+from pydoc import cli
 import subprocess
 
 import requests as re
@@ -6,6 +7,7 @@ import re as regex
 import global_items as gi
 import os
 import textwrap
+import docker
 
 
 def get_counter():
@@ -17,6 +19,21 @@ def get_counter():
     # { id:{filename: [filetype, transform, status]}, ...,
     #   id+n:{filename: [filetype, transform, status]} }
 
+# 
+def logger():
+    """ 
+    API method to obtain container logs from host docker daemon. 
+    May be able to do this more efficiently if the gtirb container 
+    is identified and saved as a global variable on flask startup
+    """
+    client = docker.from_env()
+    container_list = client.containers.list()
+    for container in container_list:
+        if container.attrs['Config']['Hostname'] == 'gtirb':
+            cont_id = container.attrs['Id']
+            logged_container = client.containers.get(cont_id)
+            gi.docker_logs = logged_container.logs()
+    return gi.docker_logs
 
 
 def gen_filename(original_bin: str, transforms:str):
