@@ -1,4 +1,5 @@
 import json
+import time
 from pydoc import cli
 import subprocess
 
@@ -32,7 +33,11 @@ def logger():
         if container.attrs['Config']['Hostname'] == 'gtirb':
             cont_id = container.attrs['Id']
             logged_container = client.containers.get(cont_id)
-            gi.docker_logs = logged_container.logs()
+            gi.docker_logs = logged_container.logs(since=(int(time.time() - 120)))
+            gi.docker_logs = str(gi.docker_logs).replace("INFO", "<br>[INFO]")
+            gi.docker_logs.replace('\n', '<br>')
+            gi.docker_logs.replace('\t', '    ')
+            print(type(gi.docker_logs), flush=True)
     return gi.docker_logs
 
 
