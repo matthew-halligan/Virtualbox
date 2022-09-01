@@ -120,7 +120,7 @@ def modify_or_upload_files():
     elif request.form['HiddenField'] == 'RunJob':
         id = request.form['JobID']
         transform = request.form['JobTransform']
-        job_status = "Must Pipe Output"
+        job_status = api_methods.logger()
         metrics_collection = request.form['JobMetrics']
         update_job_info(id, transform, job_status, metrics_collection)
 
