@@ -35,6 +35,8 @@ services:
     volumes:
 #      - /tmp/uploads:/app/uploads
       - ./:/app
+      - /var/run/docker.sock:/var/run/docker.sock # This is not safe!
+
   gsa:
     image: ijustincabral/gsa:beta
     container_name: gsa

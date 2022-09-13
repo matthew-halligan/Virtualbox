@@ -1,4 +1,4 @@
-import sys, os, shutil
+import sys, os, shutil, datetime
 import global_items as gi
 import json
 
@@ -17,12 +17,16 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # Centralized URL Map
 app.add_url_rule('/api/methods/get_counter', methods=['GET'], view_func=api_methods.get_counter)
 app.add_url_rule('/api/methods/gtirb_run_transform', methods=['GET'], view_func=api_methods.gtirb_run_transform_set)
+app.add_url_rule('/api/methods/logger', methods=['GET'], view_func=api_methods.logger)
 
 # Check that the upload folder exists
 if not os.path.isdir(UPLOAD_FOLDER):
     os.mkdir(UPLOAD_FOLDER)
 
-
+@app.route('/logs')
+def logger_render():
+    # gi.docker_logs = api_methods.logger()
+    return render_template("logs.html", piped_logs=gi.docker_logs)
 
 @app.route('/upload_gtirb')
 def upload():
@@ -116,7 +120,7 @@ def modify_or_upload_files():
     elif request.form['HiddenField'] == 'RunJob':
         id = request.form['JobID']
         transform = request.form['JobTransform']
-        job_status = "Must Pipe Output"
+        job_status = api_methods.logger()
         metrics_collection = request.form['JobMetrics']
         update_job_info(id, transform, job_status, metrics_collection)
 
@@ -332,8 +336,6 @@ def make_archive(id, directory=""):
     except shutil.Error:
         os.remove(f'{name}.{file_format}')
     return f'{name}.{file_format}', destination
-
-
 
 
 if __name__ == "__main__":
